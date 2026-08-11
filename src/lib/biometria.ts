@@ -54,7 +54,7 @@ export interface ProvaAutenticacao {
   clientDataJSON: string;
   /** authenticatorData bruto (base64url). */
   authenticatorData: string;
-  /** Assinatura ECDSA r||s (base64url). */
+  /** Assinatura ECDSA (DER ou r||s, em base64url). */
   signature: string;
 }
 
@@ -202,6 +202,59 @@ export function parseAuthData(authData: Uint8Array): AuthDataInfo {
     flags: authData[32],
     contador: ((authData[33] << 24) | (authData[34] << 16) | (authData[35] << 8) | authData[36]) >>> 0,
   };
+}
+
+/**
+ * WebAuthn devolve a assinatura ES256 em ASN.1/DER. A API WebCrypto usa o
+ * formato compacto r||s (64 bytes), enquanto alguns autenticadores/navegadores
+ * já devolvem esse formato compacto. Aceitamos os dois para o modo local e
+ * para manter o payload igual ao que o Apps Script valida.
+ */
+export function assinaturaEcdsaParaRaw(assinatura: Uint8Array): Uint8Array<ArrayBuffer> | null {
+  if (assinatura.length === 64) {
+    const bruto = new Uint8Array(64);
+    bruto.set(assinatura);
+    return bruto;
+  }
+  if (assinatura.length < 8 || assinatura[0] !== 0x30) return null;
+
+  let pos = 1;
+  let tamanho = assinatura[pos++];
+  if (tamanho & 0x80) {
+    const bytesTamanho = tamanho & 0x7f;
+    if (!bytesTamanho || bytesTamanho > 2 || pos + bytesTamanho > assinatura.length) return null;
+    tamanho = 0;
+    for (let i = 0; i < bytesTamanho; i++) tamanho = tamanho * 256 + assinatura[pos++];
+  }
+  if (pos + tamanho !== assinatura.length) return null;
+
+  const lerInteiro = (): Uint8Array | null => {
+    if (pos >= assinatura.length || assinatura[pos++] !== 0x02 || pos >= assinatura.length) return null;
+    let tamanhoInteiro = assinatura[pos++];
+    if (tamanhoInteiro & 0x80) {
+      const bytesTamanho = tamanhoInteiro & 0x7f;
+      if (!bytesTamanho || bytesTamanho > 2 || pos + bytesTamanho > assinatura.length) return null;
+      tamanhoInteiro = 0;
+      for (let i = 0; i < bytesTamanho; i++) tamanhoInteiro = tamanhoInteiro * 256 + assinatura[pos++];
+    }
+    if (!tamanhoInteiro || pos + tamanhoInteiro > assinatura.length) return null;
+    let inteiro = assinatura.slice(pos, pos + tamanhoInteiro);
+    pos += tamanhoInteiro;
+    // DER permite um zero apenas para manter o inteiro positivo.
+    while (inteiro.length > 32 && inteiro[0] === 0) inteiro = inteiro.slice(1);
+    if (inteiro.length > 32) return null;
+    const resultado = new Uint8Array(32);
+    resultado.set(inteiro, 32 - inteiro.length);
+    return resultado;
+  };
+
+  const r = lerInteiro();
+  const s = lerInteiro();
+  if (!r || !s || pos !== assinatura.length) return null;
+  const bruto = new Uint8Array(64);
+  bruto.set(r, 0);
+  bruto.set(s, 32);
+  return bruto;
 }
 
 /**
@@ -359,11 +412,13 @@ export async function verificarAutenticacao(
     const assinado = new Uint8Array(authData.length + clientDataHash.length);
     assinado.set(authData, 0);
     assinado.set(clientDataHash, authData.length);
+    const assinatura = assinaturaEcdsaParaRaw(deBase64Url(prova.signature));
+    if (!assinatura) return false;
 
     return await crypto.subtle.verify(
       { name: "ECDSA", hash: "SHA-256" },
       chave,
-      deBase64Url(prova.signature),
+      assinatura,
       assinado,
     );
   } catch {

@@ -28,7 +28,7 @@ const HOST_CONTEUDO = "script.googleusercontent.com";
  * depois de atualizar a página. Nesse caso o painel avisa em vez de deixar o
  * usuário perder dados sem perceber.
  */
-export const VERSAO_ESPERADA = 6;
+export const VERSAO_ESPERADA = 7;
 
 /** true quando a implantação publicada é anterior à esperada por este site. */
 export function versaoDesatualizada(versao: unknown) {
@@ -38,7 +38,7 @@ export function versaoDesatualizada(versao: unknown) {
 
 export const AVISO_IMPLANTACAO_ANTIGA =
   "O Apps Script publicado está desatualizado: o desconto, a biometria " +
-  "(Face ID / Digital) e os campos “O que levar”, “Informações adicionais” e a " +
+  "(Face ID / Digital), a validação da assinatura biométrica e os campos “O que levar”, “Informações adicionais” e a " +
   "data/hora de volta não são gravados na planilha — por isso eles somem depois " +
   "de atualizar a página. Abra o Apps Script, cole o Code.gs mais recente e use " +
   "Implantar → Gerenciar implantações → ✏️ → Versão: Nova versão.";

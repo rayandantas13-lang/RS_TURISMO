@@ -60,11 +60,11 @@ Depois de entrar com usuário e senha, se o aparelho (iPhone, Android ou computa
 
 Ao tocar em **Ativar Biometria e Entrar**, o navegador abre a janela nativa do aparelho (Face ID, Touch ID ou leitor de digital). A chave privada fica no cofre do dispositivo e **nunca sai dele**; o servidor guarda apenas a chave **pública** na aba `Biometria` da planilha, junto com o HMAC do token de longa duração que fica salvo no próprio aparelho (o token do usuário é vinculado à chave pública do dispositivo).
 
-Nas próximas visitas à tela de login, o sistema reconhece o aparelho e mostra o botão de destaque:
+Nas próximas visitas à tela de login, o sistema reconhece o aparelho e já solicita a biometria automaticamente. Faça a leitura para entrar sem preencher usuário ou senha. Se o navegador bloquear uma solicitação sem clique, o botão de destaque continua disponível:
 
 > **🔑 Entrar com Face ID / Digital**
 
-Toque no botão, faça a leitura biométrica e entre sem digitar a senha. A leitura é validada pelo servidor (desafio de uso único + assinatura ECDSA/P-256), então o token salvo no navegador sozinho não abre a sessão.
+Toque no botão quando ele aparecer, faça a leitura biométrica e entre sem digitar a senha. A leitura é validada pelo servidor (desafio de uso único + assinatura ECDSA/P-256), então o token salvo no navegador sozinho não abre a sessão.
 
 Requisitos e detalhes:
 
@@ -91,7 +91,7 @@ Na aba `Vouchers`, além dos dados brutos, as colunas **servicos**, **datas** e 
 
 ### Sempre que o `Code.gs` mudar, reimplante
 
-O Google continua servindo a **versão publicada** do script: salvar o arquivo no editor não muda nada para o site. Se a implantação estiver velha, o painel conecta normalmente, mas o Apps Script **descarta campos que ainda não conhece** ao gravar — foi o que fez o **desconto** sumir depois de atualizar a página (e, antes dele, "O que levar", "Informações adicionais", a data/hora de volta e o login por **Face ID / Digital**).
+O Google continua servindo a **versão publicada** do script: salvar o arquivo no editor não muda nada para o site. Se a implantação estiver velha, o painel conecta normalmente, mas o Apps Script **descarta campos que ainda não conhece** ao gravar — foi o que fez o **desconto** sumir depois de atualizar a página (e, antes dele, "O que levar", "Informações adicionais", a data/hora de volta e o login por **Face ID / Digital**). A versão 7 também corrige a validação da assinatura biométrica enviada em DER pelos navegadores.
 
 Planilhas criadas com o Code.gs antigo também são corrigidas sozinhas: na primeira requisição com o script novo, o cabeçalho da aba `Vouchers` ganha as colunas que faltam (ex.: `tipoDesconto` e `desconto`) e os dados já gravados são movidos para as colunas certas pelo nome do cabeçalho, sem perder nada.
 
