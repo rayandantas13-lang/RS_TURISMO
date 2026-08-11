@@ -23,12 +23,12 @@ const HOST_CONTEUDO = "script.googleusercontent.com";
  * Versão do google-apps-script/Code.gs que este site espera encontrar
  * publicado. Quando a planilha responde uma versão menor, o Apps Script no ar
  * é anterior aos campos novos (desconto, o que levar, informações adicionais,
- * data/hora de volta e a biometria Face ID / Digital) e descarta
- * silenciosamente esses dados ao salvar — era isso que fazia o desconto sumir
- * depois de atualizar a página. Nesse caso o painel avisa em vez de deixar o
- * usuário perder dados sem perceber.
+ * data/hora de volta) e descarta silenciosamente esses dados ao salvar — era
+ * isso que fazia o desconto sumir depois de atualizar a página. A versão 8
+ * também deixa a sessão valer por 10 dias e a renova automaticamente. Nesse
+ * caso o painel avisa em vez de deixar o usuário perder dados sem perceber.
  */
-export const VERSAO_ESPERADA = 7;
+export const VERSAO_ESPERADA = 8;
 
 /** true quando a implantação publicada é anterior à esperada por este site. */
 export function versaoDesatualizada(versao: unknown) {
@@ -37,11 +37,10 @@ export function versaoDesatualizada(versao: unknown) {
 }
 
 export const AVISO_IMPLANTACAO_ANTIGA =
-  "O Apps Script publicado está desatualizado: o desconto, a biometria " +
-  "(Face ID / Digital), a validação da assinatura biométrica e os campos “O que levar”, “Informações adicionais” e a " +
-  "data/hora de volta não são gravados na planilha — por isso eles somem depois " +
-  "de atualizar a página. Abra o Apps Script, cole o Code.gs mais recente e use " +
-  "Implantar → Gerenciar implantações → ✏️ → Versão: Nova versão.";
+  "O Apps Script publicado está desatualizado. Sem a versão nova a sessão " +
+  "pode cair cedo e campos como desconto, “O que levar”, “Informações adicionais” " +
+  "e a data/hora de volta não são gravados na planilha. Abra o Apps Script, cole " +
+  "o Code.gs mais recente e use Implantar → Gerenciar implantações → ✏️ → Versão: Nova versão.";
 
 /** Ações que podem ser repetidas sem risco de duplicar dados na planilha. */
 const ACOES_REPETIVEIS = new Set([
@@ -390,39 +389,25 @@ export const api = {
     senha: string;
     chaveInstalacao?: string;
   }) => req<Sessao>({ acao: "criarPrimeiroAdmin", ...p }),
-  eu: (token: string) => req<Usuario>({ acao: "eu", token }),
+  eu: async (token: string) => {
+    const resposta = await req<Usuario | { usuario: Usuario; expiraEm?: string }>({
+      acao: "eu",
+      token,
+    });
+    // Code.gs novo devolve { usuario, expiraEm }. O antigo devolve o usuário
+    // direto — e esse objeto também tem um campo string "usuario" (o login).
+    if (resposta && typeof resposta === "object") {
+      const interno = (resposta as { usuario?: unknown }).usuario;
+      if (interno && typeof interno === "object") {
+        return {
+          usuario: interno as Usuario,
+          expiraEm: (resposta as { expiraEm?: string }).expiraEm,
+        };
+      }
+    }
+    return { usuario: resposta as Usuario, expiraEm: undefined as string | undefined };
+  },
   sair: (token: string) => req<void>({ acao: "sair", token }),
-
-  /* -------- Biometria (Face ID / Touch ID / digital — WebAuthn) -------- */
-
-  /** Passo 1 da ativação (logado): servidor gera o desafio de registro. */
-  biometriaIniciarRegistro: (token: string, rpId: string, origem: string) =>
-    req<{ desafio: string }>({ acao: "biometriaIniciarRegistro", token, rpId, origem }),
-  /** Passo 3 da ativação: valida o registro e devolve o token do dispositivo. */
-  biometriaConcluirRegistro: (
-    token: string,
-    dados: {
-      credentialId: string;
-      attestationObject: string;
-      clientDataJSON: string;
-      rpId: string;
-      origem: string;
-    },
-  ) => req<{ refreshToken: string }>({ acao: "biometriaConcluirRegistro", token, ...dados }),
-  /** Passo 1 do login biométrico (público): desafio para a credencial. */
-  biometriaDesafioLogin: (credentialId: string) =>
-    req<{ desafio: string }>({ acao: "biometriaDesafioLogin", credentialId }),
-  /** Passo 3 do login biométrico (público): valida a leitura e entra. */
-  biometriaEntrar: (dados: {
-    credentialId: string;
-    refreshToken: string;
-    clientDataJSON: string;
-    authenticatorData: string;
-    signature: string;
-  }) => req<Sessao>({ acao: "biometriaEntrar", ...dados }),
-  /** Remove este dispositivo (exige o token do próprio aparelho). */
-  biometriaRemover: (credentialId: string, refreshToken: string) =>
-    req<void>({ acao: "biometriaRemover", credentialId, refreshToken }),
 
   dados: (token: string) => req<DadosApi>({ acao: "dados", token }),
 
