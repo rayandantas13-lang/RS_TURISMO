@@ -121,7 +121,7 @@ export const saudacaoDoDia = (agora = new Date()) => {
 
 /** Modelo padrão da mensagem que acompanha o PDF do voucher no WhatsApp. */
 export const MENSAGEM_VOUCHER_PADRAO =
-  "{saudacao}! 🌴 Segue o seu voucher com todos os detalhes do passeio. Qualquer dúvida estamos à disposição. 😊";
+  "{saudacao}! 🌴☀️ Aqui é da RS TURISMO! Segue o seu voucher {codigo} com todos os detalhes do passeio. Qualquer dúvida estamos à disposição. 😊🧡";
 
 /**
  * Monta a mensagem curta que vai junto com o PDF no WhatsApp.
@@ -154,12 +154,12 @@ export const iniciais = (nome: string) =>
     .join("");
 
 const CORES = [
-  "from-sky-500 to-amber-500",
-  "from-emerald-500 to-teal-500",
+  "from-orange-500 to-orange-600",
+  "from-zinc-900 to-orange-600",
   "from-amber-500 to-orange-500",
-  "from-rose-500 to-pink-500",
-  "from-sky-500 to-blue-500",
-  "from-fuchsia-500 to-purple-500",
+  "from-orange-600 to-red-600",
+  "from-zinc-800 to-zinc-600",
+  "from-orange-500 to-amber-500",
 ];
 
 export const corAvatar = (id: string) => {
@@ -270,7 +270,7 @@ export const aReceber = (v: Voucher) =>
 export const totalPessoas = (v: Voucher) =>
   Number(v.pessoas) || (v.clientes || []).filter((n) => n.trim()).length || 1;
 
-export const gerarCodigo = (prefixo = "VP") => {
+export const gerarCodigo = (prefixo = "RS") => {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   const numeros = new Uint32Array(5);
   if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function")

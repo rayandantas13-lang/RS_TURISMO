@@ -40,9 +40,9 @@ function Kpi({
       <div className={cn("grid size-11 place-items-center rounded-xl", cor)}>
         <Icon name={icone} className="size-5" />
       </div>
-      <p className="mt-4 text-2xl font-extrabold tracking-tight text-slate-900">{valor}</p>
-      <p className="text-sm font-semibold text-slate-600">{rotulo}</p>
-      <p className="mt-1 text-xs text-slate-400">{detalhe}</p>
+      <p className="mt-4 text-2xl font-extrabold tracking-tight text-zinc-900">{valor}</p>
+      <p className="text-sm font-semibold text-zinc-600">{rotulo}</p>
+      <p className="mt-1 text-xs text-zinc-400">{detalhe}</p>
     </Cartao>
   );
 }
@@ -116,21 +116,21 @@ export default function Dashboard({ ir }: { ir: (r: string) => void }) {
   }) => (
     <li
       onClick={() => ir("vouchers")}
-      className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-sky-50/50"
+      className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-orange-50/70"
     >
-      <div className="grid w-14 shrink-0 place-items-center rounded-lg bg-sky-50 py-1.5 text-xs font-extrabold text-sky-700">
+      <div className="grid w-14 shrink-0 place-items-center rounded-lg bg-orange-50 py-1.5 text-xs font-extrabold text-orange-700">
         {hora || dataBR(data).slice(0, 5)}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-slate-800">{nomesClientes(v)}</p>
-        <p className="truncate text-xs text-slate-500">
+        <p className="truncate text-sm font-semibold text-zinc-800">{nomesClientes(v)}</p>
+        <p className="truncate text-xs text-zinc-500">
           {nome} · {totalPessoas(v)} pax{local ? ` · ${local}` : ""}
         </p>
       </div>
       <div className="shrink-0 text-right">
-        <p className="font-mono text-[11px] font-bold text-slate-400">{v.codigo}</p>
+        <p className="font-mono text-[11px] font-bold text-zinc-400">{v.codigo}</p>
         {aReceber(v) > 0 && (
-          <p className="text-[11px] font-bold text-amber-600">receber {brl(aReceber(v))}</p>
+          <p className="text-[11px] font-bold text-orange-600">receber {brl(aReceber(v))}</p>
         )}
       </div>
     </li>
@@ -138,19 +138,21 @@ export default function Dashboard({ ir }: { ir: (r: string) => void }) {
 
   return (
     <div className="space-y-6">
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0C4A6E] via-sky-700 to-[#155E75] p-6 text-white shadow-lg shadow-sky-800/30 sm:p-8">
-        <div className="absolute -top-16 -right-10 size-56 rounded-full bg-amber-400/15 blur-2xl" />
-        <div className="absolute right-32 -bottom-24 size-56 rounded-full bg-sky-400/20 blur-3xl" />
-        <div className="absolute top-4 right-4 opacity-10">
+      <div className="relative overflow-hidden rounded-3xl bg-[#0A0A0A] p-6 text-white shadow-xl shadow-black/20 sm:p-8 border border-zinc-800">
+        <div className="absolute -top-20 -right-20 size-72 rounded-full bg-orange-500/20 blur-3xl" />
+        <div className="absolute right-20 -bottom-20 size-64 rounded-full bg-orange-600/15 blur-3xl" />
+        <div className="absolute -left-10 top-1/2 size-48 -translate-y-1/2 rounded-full bg-white/5 blur-2xl" />
+        {/* Sol laranja decorativo */}
+        <div className="absolute top-6 right-6 opacity-[0.08]">
           <svg width="120" height="120" viewBox="0 0 100 100" fill="none">
-            <circle cx="50" cy="50" r="45" stroke="white" strokeWidth="1.5" fill="none"/>
-            <path d="M15 55 Q30 42 45 55 Q60 68 75 55 Q85 47 90 55" stroke="white" strokeWidth="2" fill="none"/>
-            <path d="M10 65 Q25 55 40 65 Q55 75 70 65 Q80 58 85 65" stroke="white" strokeWidth="1.5" fill="none"/>
+            <circle cx="50" cy="50" r="40" fill="#FF6B00"/>
+            <path d="M0 50 H20 M80 50 H100 M50 0 V20 M50 80 V100" stroke="#FF6B00" strokeWidth="3"/>
           </svg>
         </div>
         <div className="relative flex flex-wrap items-end justify-between gap-6">
           <div>
-            <p className="text-xs font-bold tracking-[0.18em] text-amber-300 uppercase">
+            <p className="flex items-center gap-2 text-xs font-bold tracking-[0.18em] text-orange-400 uppercase">
+              <span className="size-1.5 rounded-full bg-orange-500" />
               {config.empresa} · painel de vouchers
             </p>
             <h1 className="mt-2 text-2xl font-extrabold tracking-tight sm:text-3xl">
@@ -158,11 +160,11 @@ export default function Dashboard({ ir }: { ir: (r: string) => void }) {
                 ? `${d.doDia.length} passeio${d.doDia.length > 1 ? "s" : ""} hoje · ${d.pessoasHoje} pessoas`
                 : "Nenhum passeio marcado para hoje"}
             </h1>
-            <p className="mt-1.5 text-sm text-sky-100">
+            <p className="mt-1.5 text-sm text-zinc-300">
               {d.pendentes} voucher(s) pendente(s) · {brl(d.aReceberTotal)} a receber
             </p>
             {(config.cnpj || config.telefone) && (
-              <p className="mt-1 text-xs text-sky-100/75">
+              <p className="mt-1 text-xs text-zinc-400">
                 {config.cnpj && <span>CNPJ {config.cnpj}</span>}
                 {config.cnpj && config.telefone && <span> · </span>}
                 {config.telefone && <span>Tel: {config.telefone}</span>}
@@ -172,13 +174,13 @@ export default function Dashboard({ ir }: { ir: (r: string) => void }) {
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => ir("vouchers")}
-              className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-bold text-white shadow-sm shadow-amber-600/30 transition hover:bg-amber-400"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#FF6B00] px-4 py-2.5 text-sm font-bold text-white shadow-sm shadow-orange-600/30 transition hover:bg-[#E55A00]"
             >
               <Icon name="plus" className="size-4" /> Criar voucher
             </button>
             <button
               onClick={() => ir("agenda")}
-              className="inline-flex items-center gap-2 rounded-xl bg-white/15 px-4 py-2.5 text-sm font-bold text-white ring-1 ring-white/25 backdrop-blur transition hover:bg-white/25"
+              className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2.5 text-sm font-bold text-white ring-1 ring-white/20 backdrop-blur transition hover:bg-white/20"
             >
               <Icon name="calendar" className="size-4" /> Ver agenda
             </button>
@@ -192,14 +194,14 @@ export default function Dashboard({ ir }: { ir: (r: string) => void }) {
           rotulo="Vouchers no mês"
           valor={String(d.totalMes)}
           detalhe={`${vouchers.length} no total`}
-          cor="bg-sky-50 text-sky-600"
+          cor="bg-orange-50 text-orange-600 ring-1 ring-orange-100"
         />
         <Kpi
           icone="users"
           rotulo="Pessoas hoje"
           valor={String(d.pessoasHoje)}
           detalhe={`em ${d.doDia.length} passeio(s)`}
-          cor="bg-amber-50 text-amber-600"
+          cor="bg-zinc-900 text-white"
         />
         <Kpi
           icone="money"
@@ -219,10 +221,10 @@ export default function Dashboard({ ir }: { ir: (r: string) => void }) {
 
       <div className="grid gap-6 xl:grid-cols-3">
         <Cartao className="xl:col-span-2">
-          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+          <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-4">
             <div>
-              <h2 className="font-bold text-slate-900">Passeios de hoje</h2>
-              <p className="text-xs text-slate-500">{dataBR(h)}</p>
+              <h2 className="font-bold text-zinc-900">Passeios de hoje</h2>
+              <p className="text-xs text-zinc-500">{dataBR(h)}</p>
             </div>
             <Botao variante="contorno" icone="calendar" onClick={() => ir("agenda")}>
               Agenda
@@ -251,17 +253,17 @@ export default function Dashboard({ ir }: { ir: (r: string) => void }) {
         </Cartao>
 
         <Cartao className="p-5">
-          <h2 className="font-bold text-slate-900">Pessoas por dia</h2>
-          <p className="text-xs text-slate-500">Próximos dias</p>
+          <h2 className="font-bold text-zinc-900">Pessoas por dia</h2>
+          <p className="text-xs text-zinc-500">Próximos dias</p>
           <div className="mt-6 flex h-44 items-end justify-between gap-2">
             {d.serie.map((s) => (
               <div key={s.dia} className="flex flex-1 flex-col items-center gap-2">
-                <span className="text-[10px] font-bold text-slate-400">{s.pessoas || ""}</span>
+                <span className="text-[10px] font-bold text-zinc-400">{s.pessoas || ""}</span>
                 <div className="flex h-32 w-full items-end">
                   <div
                     className={cn(
                       "w-full rounded-t-md transition-all",
-                      s.hoje ? "bg-sky-600" : "bg-sky-300",
+                      s.hoje ? "bg-[#FF6B00]" : "bg-orange-200",
                     )}
                     style={{ height: `${Math.max(4, (s.pessoas / d.maxSerie) * 100)}%` }}
                     title={`${s.pessoas} pessoas`}
@@ -270,7 +272,7 @@ export default function Dashboard({ ir }: { ir: (r: string) => void }) {
                 <span
                   className={cn(
                     "text-[11px] font-bold",
-                    s.hoje ? "text-sky-600" : "text-slate-400",
+                    s.hoje ? "text-orange-600" : "text-zinc-400",
                   )}
                 >
                   {s.rotulo}
@@ -282,41 +284,41 @@ export default function Dashboard({ ir }: { ir: (r: string) => void }) {
       </div>
 
       <Cartao>
-        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-          <h2 className="font-bold text-slate-900">Próximos passeios</h2>
+        <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-4">
+          <h2 className="font-bold text-zinc-900">Próximos passeios</h2>
           <button
             onClick={() => ir("vouchers")}
-            className="text-xs font-bold text-sky-600 hover:text-sky-800"
+            className="text-xs font-bold text-orange-600 hover:text-orange-700"
           >
             Ver vouchers
           </button>
         </div>
         {d.proximos.length ? (
-          <ul className="divide-y divide-slate-50">
+          <ul className="divide-y divide-zinc-50">
             {d.proximos.map((e) => (
               <li
                 key={e.p.id}
                 onClick={() => ir("vouchers")}
-                className="flex cursor-pointer items-center gap-3 px-5 py-3.5 transition-colors hover:bg-slate-50"
+                className="flex cursor-pointer items-center gap-3 px-5 py-3.5 transition-colors hover:bg-zinc-50"
               >
-                <div className="grid w-16 shrink-0 place-items-center rounded-xl bg-slate-100 py-2">
-                  <span className="text-sm font-extrabold text-slate-800">
+                <div className="grid w-16 shrink-0 place-items-center rounded-xl bg-zinc-900 py-2 text-white">
+                  <span className="text-sm font-extrabold">
                     {dataBR(e.p.data).slice(0, 5)}
                   </span>
-                  <span className="text-[10px] font-bold text-slate-500">{e.p.hora || "—"}</span>
+                  <span className="text-[10px] font-bold text-zinc-400">{e.p.hora || "—"}</span>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-slate-900">
+                  <p className="truncate text-sm font-semibold text-zinc-900">
                     {nomesClientes(e.v)}
                   </p>
-                  <p className="truncate text-xs text-slate-500">
+                  <p className="truncate text-xs text-zinc-500">
                     {e.p.nome} · {totalPessoas(e.v)} pessoa(s) · {e.v.hotel || "sem hotel"}
                   </p>
                 </div>
                 <Selo className={statusMeta(e.v.status).chip}>
                   {statusMeta(e.v.status).label}
                 </Selo>
-                <span className="hidden w-20 text-right text-xs font-bold text-slate-400 sm:block">
+                <span className="hidden w-20 text-right text-xs font-bold text-zinc-400 sm:block">
                   {rotuloRelativo(e.p.data)}
                 </span>
               </li>
@@ -337,9 +339,9 @@ export default function Dashboard({ ir }: { ir: (r: string) => void }) {
       </Cartao>
 
       {vouchers.length > 0 && (
-        <p className="text-center text-xs text-slate-400">
+        <p className="text-center text-xs text-zinc-400">
           Serviço mais vendido:{" "}
-          <b className="text-slate-600">
+          <b className="text-zinc-600">
             {nomesPasseios(vouchers[0]) || "—"}
           </b>
         </p>

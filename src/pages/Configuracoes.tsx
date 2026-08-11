@@ -41,7 +41,7 @@ import { cn } from "@/utils/cn";
 /** Voucher fictício usado na prévia da mensagem do WhatsApp. */
 const voucherExemplo: Voucher = {
   id: "exemplo",
-  codigo: "VP-A1B2C",
+  codigo: "RS-A1B2C",
   clientes: ["Maria Silva", "João Silva"],
   pessoas: 2,
   hotel: "",
@@ -242,7 +242,7 @@ export default function Configuracoes() {
       <div className="grid gap-5 lg:grid-cols-2">
         <Cartao className="p-5">
           <div className="mb-4 flex items-center gap-2">
-            <span className="grid size-9 place-items-center rounded-xl bg-sky-50 text-sky-600">
+            <span className="grid size-9 place-items-center rounded-xl bg-orange-50 text-orange-600">
               <Icon name="settings" className="size-4" />
             </span>
             <div>
@@ -669,7 +669,7 @@ export default function Configuracoes() {
                   <Selo
                     className={
                       u.papel === "admin"
-                        ? "bg-sky-50 text-sky-700 ring-sky-200"
+                        ? "bg-orange-50 text-orange-700 ring-orange-200"
                         : "bg-slate-100 text-slate-600 ring-slate-200"
                     }
                   >
@@ -743,7 +743,7 @@ export default function Configuracoes() {
             </>,
           ].map((t, i) => (
             <li key={i} className="flex gap-3">
-              <span className="grid size-6 shrink-0 place-items-center rounded-full bg-sky-100 text-xs font-bold text-sky-700">
+              <span className="grid size-6 shrink-0 place-items-center rounded-full bg-orange-100 text-xs font-bold text-orange-700">
                 {i + 1}
               </span>
               <span>{t}</span>

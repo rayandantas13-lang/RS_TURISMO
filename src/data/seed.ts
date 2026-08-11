@@ -5,13 +5,13 @@ const hj = new Date();
 const d = (n: number) => iso(addDays(hj, n));
 
 export const CONFIG_PADRAO: Config = {
-  empresa: "Vem Pra Porto",
+  empresa: "RS TURISMO",
   cnpj: "",
-  instagram: "@vempraporto.ps",
+  instagram: "@rs.turismo",
   telefone: "",
   mensagemVoucher: MENSAGEM_VOUCHER_PADRAO,
   politicaCancelamento:
-    "Prezados(as),\n\nInformamos que cancelamentos realizados com até 18 horas de antecedência do horário do passeio estarão sujeitos à cobrança integral do valor do passeio.\n\nA exceção será apenas em casos de doença, mediante apresentação de atestado médico válido.\n\nAgradecemos pela compreensão e permanecemos à disposição.",
+    "Prezados(as),\n\nInformamos que cancelamentos realizados com até 18 horas de antecedência do horário do passeio estarão sujeitos à cobrança integral do valor do passeio.\n\nA exceção será apenas em casos de doença, mediante apresentação de atestado médico válido.\n\nAgradecemos pela compreensão e permanecemos à disposição.\n\nRS TURISMO - Seu passeio, nossa alegria!",
   servicos: [
     {
       id: "s1",
@@ -19,7 +19,7 @@ export const CONFIG_PADRAO: Config = {
       preco: 300,
       oQueLevar: "• Protetor solar, boné/chapéu\n• Roupa de banho + toalha\n• Câmera / celular carregado\n• Dinheiro / cartão para compras",
       pontoRetorno: "Retorno previsto no mesmo ponto de embarque (Hotel / Pousada). Horário aproximado de retorno: conforme roteiro.",
-      informacoesAdicionais: "Em caso de atraso ou imprevisto, entre em contato com nossa central pelo WhatsApp da empresa. Obrigado por escolher a Vem Pra Porto!",
+      informacoesAdicionais: "Em caso de atraso ou imprevisto, entre em contato com nossa central pelo WhatsApp da empresa. Obrigado por escolher a RS TURISMO!",
     },
     {
       id: "s2",
@@ -27,7 +27,7 @@ export const CONFIG_PADRAO: Config = {
       preco: 180,
       oQueLevar: "• Protetor solar, boné/chapéu\n• Calçado confortável\n• Câmera / celular carregado\n• Dinheiro / cartão para compras",
       pontoRetorno: "Retorno previsto no mesmo ponto de embarque (Hotel / Pousada). Horário aproximado de retorno: conforme roteiro.",
-      informacoesAdicionais: "Em caso de atraso ou imprevisto, entre em contato com nossa central pelo WhatsApp da empresa. Obrigado por escolher a Vem Pra Porto!",
+      informacoesAdicionais: "Em caso de atraso ou imprevisto, entre em contato com nossa central pelo WhatsApp da empresa. Obrigado por escolher a RS TURISMO!",
     },
     {
       id: "s3",
@@ -35,7 +35,7 @@ export const CONFIG_PADRAO: Config = {
       preco: 150,
       oQueLevar: "• Protetor solar, boné/chapéu\n• Roupa de banho + toalha\n• Dinheiro / cartão para compras",
       pontoRetorno: "Retorno previsto no mesmo ponto de embarque (Hotel / Pousada). Horário aproximado de retorno: conforme roteiro.",
-      informacoesAdicionais: "Em caso de atraso ou imprevisto, entre em contato com nossa central pelo WhatsApp da empresa. Obrigado por escolher a Vem Pra Porto!",
+      informacoesAdicionais: "Em caso de atraso ou imprevisto, entre em contato com nossa central pelo WhatsApp da empresa. Obrigado por escolher a RS TURISMO!",
     },
     {
       id: "s4",
@@ -70,7 +70,7 @@ export function criarVouchersExemplo(): Voucher[] {
   return [
     {
       id: uid(),
-      codigo: gerarCodigo(),
+      codigo: gerarCodigo("RS"),
       clientes: ["Ronaldo Alves", "Cida Lima"],
       pessoas: 2,
       hotel: "Paraíso Mar Hotel (Arraial)",
@@ -96,7 +96,7 @@ export function criarVouchersExemplo(): Voucher[] {
     },
     {
       id: uid(),
-      codigo: gerarCodigo(),
+      codigo: gerarCodigo("RS"),
       clientes: ["Marcos Pereira", "Ana Paula Pereira", "Lucas Pereira"],
       pessoas: 3,
       hotel: "Pousada Vila do Sol (Trancoso)",
@@ -115,7 +115,7 @@ export function criarVouchersExemplo(): Voucher[] {
     },
     {
       id: uid(),
-      codigo: gerarCodigo(),
+      codigo: gerarCodigo("RS"),
       clientes: ["Fernanda Costa"],
       pessoas: 1,
       hotel: "Hotel Porto Bello",
@@ -133,7 +133,7 @@ export function criarVouchersExemplo(): Voucher[] {
     },
     {
       id: uid(),
-      codigo: gerarCodigo(),
+      codigo: gerarCodigo("RS"),
       clientes: ["Roberto Dias", "Sandra Dias"],
       pessoas: 2,
       hotel: "Resort Costa Brasilis",

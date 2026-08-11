@@ -7,10 +7,10 @@ import { Icon, type IconName } from "@/components/Icon";
 type Variante = "primario" | "suave" | "contorno" | "fantasma" | "perigo" | "sucesso";
 const VAR: Record<Variante, string> = {
   primario:
-    "bg-sky-600 text-white shadow-sm shadow-sky-600/25 hover:bg-sky-700 active:bg-sky-800",
-  suave: "bg-sky-50 text-sky-700 hover:bg-sky-100",
-  contorno: "bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50 hover:ring-slate-300",
-  fantasma: "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
+    "bg-[#FF6B00] text-white shadow-sm shadow-orange-600/25 hover:bg-[#E55A00] active:bg-[#CC4F00]",
+  suave: "bg-orange-50 text-orange-700 hover:bg-orange-100",
+  contorno: "bg-white text-zinc-700 ring-1 ring-zinc-200 hover:bg-zinc-50 hover:ring-zinc-300",
+  fantasma: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900",
   perigo: "bg-rose-600 text-white hover:bg-rose-700",
   sucesso: "bg-emerald-600 text-white hover:bg-emerald-700",
 };
@@ -32,7 +32,7 @@ export function Botao({
       {...props}
       disabled={props.disabled || carregando}
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+        "inline-flex items-center justify-center gap-2 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
         VAR[variante],
         className,
       )}
@@ -59,7 +59,7 @@ export function BotaoIcone({
       title={titulo}
       aria-label={titulo}
       className={cn(
-        "inline-grid size-9 place-items-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-sky-500 outline-none",
+        "inline-grid size-9 place-items-center rounded-lg text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 focus-visible:ring-2 focus-visible:ring-orange-500 outline-none",
         className,
       )}
     >
@@ -70,7 +70,7 @@ export function BotaoIcone({
 
 /* ---------------- Campos ---------------- */
 export const BASE_CAMPO =
-  "w-full rounded-xl border-0 bg-white px-3.5 py-2.5 text-sm text-slate-900 ring-1 ring-slate-200 transition placeholder:text-slate-400 focus:ring-2 focus:ring-sky-500 outline-none disabled:bg-slate-50 disabled:text-slate-400";
+  "w-full rounded-xl border-0 bg-white px-3.5 py-2.5 text-sm text-zinc-900 ring-1 ring-zinc-200 transition placeholder:text-zinc-400 focus:ring-2 focus:ring-orange-500 outline-none disabled:bg-zinc-50 disabled:text-zinc-400";
 
 export function Campo({
   rotulo,
@@ -88,9 +88,9 @@ export function Campo({
   return (
     <label className={cn("block", className)}>
       {rotulo && (
-        <span className="mb-1.5 flex items-center justify-between gap-2 text-xs font-semibold text-slate-600">
+        <span className="mb-1.5 flex items-center justify-between gap-2 text-xs font-semibold text-zinc-600">
           {rotulo}
-          {dica && <span className="font-normal text-slate-400">{dica}</span>}
+          {dica && <span className="font-normal text-zinc-400">{dica}</span>}
         </span>
       )}
       {children}
@@ -148,7 +148,7 @@ export function Busca({
     <div className={cn("relative", className)}>
       <Icon
         name="search"
-        className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-slate-400"
+        className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-zinc-400"
       />
       <input
         value={valor}
@@ -159,7 +159,7 @@ export function Busca({
       {valor && (
         <button
           onClick={() => aoMudar("")}
-          className="absolute top-1/2 right-2 -translate-y-1/2 rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+          className="absolute top-1/2 right-2 -translate-y-1/2 rounded-md p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
           aria-label="Limpar busca"
         >
           <Icon name="close" className="size-3.5" />
@@ -174,7 +174,7 @@ export function Cartao({ children, className }: { children: ReactNode; className
   return (
     <div
       className={cn(
-        "rounded-2xl bg-white shadow-sm shadow-slate-200/60 ring-1 ring-slate-200/80",
+        "rounded-2xl bg-white shadow-sm shadow-zinc-200/60 ring-1 ring-zinc-200/80",
         className,
       )}
     >
@@ -231,12 +231,12 @@ export function Vazio({
 }) {
   return (
     <div className="flex flex-col items-center justify-center gap-3 px-6 py-16 text-center">
-      <div className="grid size-14 place-items-center rounded-2xl bg-slate-100 text-slate-400">
+      <div className="grid size-14 place-items-center rounded-2xl bg-zinc-100 text-zinc-400 ring-1 ring-zinc-200">
         <Icon name={icone} className="size-6" />
       </div>
       <div>
-        <p className="font-semibold text-slate-800">{titulo}</p>
-        {texto && <p className="mt-1 max-w-sm text-sm text-slate-500">{texto}</p>}
+        <p className="font-semibold text-zinc-800">{titulo}</p>
+        {texto && <p className="mt-1 max-w-sm text-sm text-zinc-500">{texto}</p>}
       </div>
       {acao}
     </div>
@@ -255,7 +255,7 @@ export function Aviso({
   const map = {
     ok: "bg-emerald-50 text-emerald-800 ring-emerald-200",
     erro: "bg-rose-50 text-rose-700 ring-rose-200",
-    info: "bg-sky-50 text-sky-800 ring-sky-200",
+    info: "bg-orange-50 text-orange-800 ring-orange-200",
     alerta: "bg-amber-50 text-amber-800 ring-amber-200",
   } as const;
   const padrao: Record<string, IconName> = {
@@ -308,12 +308,6 @@ export function Modal({
 
   if (!aberto) return null;
 
-  /*
-   * O modal vai para o <body> via portal: assim o `position: fixed` fica
-   * sempre relativo à tela, mesmo se algum ancestral tiver transform
-   * (ex.: animações .anim-up), que antes deixava o rodapé fora da área
-   * visível sem como rolar até os botões.
-   */
   return createPortal(
     <div
       role="dialog"
@@ -329,7 +323,7 @@ export function Modal({
       }}
     >
       <div
-        className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm"
+        className="fixed inset-0 bg-zinc-950/60 backdrop-blur-sm"
         onClick={aoFechar}
         aria-hidden="true"
       />
@@ -337,14 +331,14 @@ export function Modal({
         <div
           onClick={(e) => e.stopPropagation()}
           className={cn(
-            "modal-panel anim-pop relative flex w-full max-w-full flex-col overflow-hidden rounded-2xl sm:rounded-3xl bg-white shadow-2xl ring-1 ring-slate-900/10",
+            "modal-panel anim-pop relative flex w-full max-w-full flex-col overflow-hidden rounded-2xl sm:rounded-3xl bg-white shadow-2xl ring-1 ring-zinc-900/10",
             largura,
           )}
         >
-          <header className="flex shrink-0 items-start justify-between gap-4 border-b border-slate-100 px-5 py-4 sm:px-6 sm:py-5">
+          <header className="flex shrink-0 items-start justify-between gap-4 border-b border-zinc-100 px-5 py-4 sm:px-6 sm:py-5">
             <div>
-              <h2 className="text-lg font-bold text-slate-900">{titulo}</h2>
-              {subtitulo && <p className="mt-0.5 text-sm text-slate-500">{subtitulo}</p>}
+              <h2 className="text-lg font-bold text-zinc-900">{titulo}</h2>
+              {subtitulo && <p className="mt-0.5 text-sm text-zinc-500">{subtitulo}</p>}
             </div>
             <BotaoIcone icone="close" titulo="Fechar" onClick={aoFechar} />
           </header>
@@ -352,7 +346,7 @@ export function Modal({
             {children}
           </div>
           {rodape && (
-            <footer className="flex shrink-0 flex-wrap items-center justify-end gap-2 border-t border-slate-100 bg-slate-50/70 px-5 py-4 shadow-[0_-8px_16px_-12px_rgba(15,23,42,0.35)] sm:px-6">
+            <footer className="flex shrink-0 flex-wrap items-center justify-end gap-2 border-t border-zinc-100 bg-zinc-50/70 px-5 py-4 shadow-[0_-8px_16px_-12px_rgba(15,23,42,0.35)] sm:px-6">
               {rodape}
             </footer>
           )}
@@ -363,9 +357,9 @@ export function Modal({
   );
 }
 
-export function Progresso({ pct, cor = "bg-sky-500" }: { pct: number; cor?: string }) {
+export function Progresso({ pct, cor = "bg-orange-500" }: { pct: number; cor?: string }) {
   return (
-    <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+    <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-100">
       <div
         className={cn("h-full rounded-full transition-all duration-500", cor)}
         style={{ width: `${Math.min(100, Math.max(0, pct))}%` }}

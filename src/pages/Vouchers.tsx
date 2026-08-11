@@ -224,7 +224,7 @@ export default function Vouchers() {
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {[
-          { l: "Vouchers", v: String(stats.total), i: "ticket" as const, c: "text-sky-600 bg-sky-50" },
+          { l: "Vouchers", v: String(stats.total), i: "ticket" as const, c: "text-orange-600 bg-orange-50" },
           { l: "Pessoas atendidas", v: String(stats.pessoas), i: "users" as const, c: "text-amber-600 bg-amber-50" },
           { l: "Total dos vouchers", v: brl(stats.faturado), i: "money" as const, c: "text-emerald-600 bg-emerald-50" },
           { l: "A receber", v: brl(stats.receber), i: "clock" as const, c: "text-amber-600 bg-amber-50" },
@@ -257,7 +257,7 @@ export default function Vouchers() {
                 className={cn(
                   "rounded-lg px-3 py-1.5 text-xs font-bold whitespace-nowrap transition",
                   filtro === f
-                    ? "bg-white text-sky-700 shadow-sm"
+                    ? "bg-white text-orange-700 shadow-sm"
                     : "text-slate-500 hover:text-slate-800",
                 )}
               >
@@ -295,7 +295,7 @@ export default function Vouchers() {
                     "flex items-start justify-between gap-3 px-5 py-4",
                     v.status === "cancelado"
                       ? "bg-slate-200 text-slate-600"
-                      : "bg-gradient-to-br from-sky-600 to-amber-600 text-white",
+                      : "bg-gradient-to-br from-zinc-900 to-orange-600 text-white",
                   )}
                 >
                   <div className="min-w-0">
@@ -351,7 +351,7 @@ export default function Vouchers() {
 
                   <div className="space-y-1.5 text-sm">
                     <p className="flex items-start gap-2 text-slate-700">
-                      <Icon name="pin" className="mt-0.5 size-4 shrink-0 text-sky-500" />
+                      <Icon name="pin" className="mt-0.5 size-4 shrink-0 text-orange-500" />
                       <span className="font-semibold">{nomesPasseios(v) || "—"}</span>
                     </p>
                     <p className="flex items-center gap-2 text-xs text-slate-500">
@@ -391,7 +391,7 @@ export default function Vouchers() {
                         target="_blank"
                         rel="noreferrer"
                         title="Abrir no Google Agenda"
-                        className="inline-grid size-9 place-items-center rounded-lg text-slate-500 transition hover:bg-sky-50 hover:text-sky-600"
+                        className="inline-grid size-9 place-items-center rounded-lg text-slate-500 transition hover:bg-orange-50 hover:text-orange-600"
                       >
                         <Icon name="calendar" className="size-4" />
                       </a>
@@ -513,7 +513,7 @@ export default function Vouchers() {
             <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200">
               <div className="mb-3 flex items-center justify-between">
                 <p className="flex items-center gap-2 text-sm font-bold text-slate-800">
-                  <Icon name="users" className="size-4 text-sky-600" /> Clientes do serviço
+                  <Icon name="users" className="size-4 text-orange-600" /> Clientes do serviço
                 </p>
                 <Botao variante="suave" icone="plus" onClick={addCliente} className="px-2.5 py-1.5 text-xs">
                   Adicionar pessoa
@@ -571,9 +571,9 @@ export default function Vouchers() {
             </div>
 
             {/* Passeios */}
-            <div className="rounded-2xl bg-sky-50/60 p-4 ring-1 ring-sky-100">
+            <div className="rounded-2xl bg-orange-50/60 p-4 ring-1 ring-orange-100">
               <div className="mb-3 flex items-center justify-between">
-                <p className="flex items-center gap-2 text-sm font-bold text-sky-800">
+                <p className="flex items-center gap-2 text-sm font-bold text-orange-800">
                   <Icon name="pin" className="size-4" /> Passeios contratados
                 </p>
                 <Botao variante="suave" icone="plus" onClick={addPasseio} className="px-2.5 py-1.5 text-xs">
