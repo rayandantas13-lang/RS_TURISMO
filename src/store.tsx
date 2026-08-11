@@ -13,34 +13,52 @@ import { CONFIG_PADRAO } from "@/data/seed";
 import { normalizarStatus, uid } from "@/lib/utils";
 
 const SESSAO_KEY = "vempraporto.sessao";
-const TEMPO_OCIOSO_MS = 30 * 60 * 1000;
+
+function sessaoValida(s: unknown): s is Sessao {
+  if (!s || typeof s !== "object") return false;
+  const sessao = s as Sessao;
+  return !!(
+    sessao.token &&
+    sessao.usuario &&
+    sessao.usuario.papel &&
+    sessao.expiraEm &&
+    new Date(sessao.expiraEm).getTime() > Date.now()
+  );
+}
 
 /**
- * A sessão fica somente na aba atual. Não usamos localStorage para que um token
- * de acesso não continue gravado no computador depois que o navegador fechar.
+ * A sessão fica neste navegador (localStorage) e vale por várias semanas.
+ * Assim o painel continua conectado ao fechar a aba, o celular ou o Chrome.
  */
 function lerSessao(): Sessao | null {
   try {
-    // Descarta sessões persistentes criadas por versões antigas.
-    localStorage.removeItem(SESSAO_KEY);
-    const raw = sessionStorage.getItem(SESSAO_KEY);
+    const raw = localStorage.getItem(SESSAO_KEY) || sessionStorage.getItem(SESSAO_KEY);
     if (!raw) return null;
     const sessao = JSON.parse(raw) as Sessao;
-    if (!sessao.token || !sessao.usuario || !sessao.usuario.papel || new Date(sessao.expiraEm).getTime() <= Date.now()) {
+    if (!sessaoValida(sessao)) {
+      localStorage.removeItem(SESSAO_KEY);
       sessionStorage.removeItem(SESSAO_KEY);
       return null;
     }
+    if (!localStorage.getItem(SESSAO_KEY)) localStorage.setItem(SESSAO_KEY, raw);
+    sessionStorage.removeItem(SESSAO_KEY);
     return sessao;
   } catch {
+    localStorage.removeItem(SESSAO_KEY);
     sessionStorage.removeItem(SESSAO_KEY);
     return null;
   }
 }
 
 function gravarSessao(s: Sessao | null) {
-  localStorage.removeItem(SESSAO_KEY);
-  if (s) sessionStorage.setItem(SESSAO_KEY, JSON.stringify(s));
-  else sessionStorage.removeItem(SESSAO_KEY);
+  sessionStorage.removeItem(SESSAO_KEY);
+  if (s) localStorage.setItem(SESSAO_KEY, JSON.stringify(s));
+  else localStorage.removeItem(SESSAO_KEY);
+}
+
+function sessaoDeveEncerrar(erro: unknown) {
+  const msg = erro instanceof Error ? erro.message : "";
+  return /sessão expirada|usuário inativo|usuario inativo/i.test(msg);
 }
 
 export interface Toast {
@@ -107,49 +125,25 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
     api
       .eu(guardada.token)
-      .then((usuario) => {
-        const nova = { ...guardada, usuario };
+      .then((resposta) => {
+        const nova = {
+          ...guardada,
+          usuario: resposta.usuario,
+          expiraEm: resposta.expiraEm || guardada.expiraEm,
+        };
         setSessao(nova);
         gravarSessao(nova);
       })
-      .catch(() => {
-        gravarSessao(null);
-        setSessao(null);
+      .catch((erro: unknown) => {
+        // Só desconecta se o servidor recusou a sessão. Queda de rede ou
+        // instabilidade do Apps Script não podem expulsar quem já estava dentro.
+        if (sessaoDeveEncerrar(erro)) {
+          gravarSessao(null);
+          setSessao(null);
+        }
       })
       .finally(() => setVerificando(false));
   }, []);
-
-  useEffect(() => {
-    if (!sessao) return;
-
-    let ultimaAtividade = Date.now();
-    const registrarAtividade = () => {
-      ultimaAtividade = Date.now();
-    };
-    const eventos: (keyof WindowEventMap)[] = ["pointerdown", "keydown", "touchstart", "scroll"];
-    eventos.forEach((evento) => window.addEventListener(evento, registrarAtividade, { passive: true }));
-
-    const relogio = window.setInterval(() => {
-      const expirou = new Date(sessao.expiraEm).getTime() <= Date.now();
-      const ociosa = Date.now() - ultimaAtividade >= TEMPO_OCIOSO_MS;
-      if (!expirou && !ociosa) return;
-
-      void api.sair(sessao.token).catch(() => {});
-      gravarSessao(null);
-      setSessao(null);
-      setVouchers([]);
-      setConfig(CONFIG_PADRAO);
-      notificar(
-        expirou ? "Sua sessão expirou. Entre novamente." : "Sessão encerrada por inatividade.",
-        "info",
-      );
-    }, 30_000);
-
-    return () => {
-      window.clearInterval(relogio);
-      eventos.forEach((evento) => window.removeEventListener(evento, registrarAtividade));
-    };
-  }, [sessao, notificar]);
 
   useEffect(() => {
     if (!sessao) return;
