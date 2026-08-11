@@ -2,8 +2,7 @@ import { cn } from "@/utils/cn";
 import { logoDataUrl } from "@/assets/logoData";
 
 /**
- * Logo RS TURISMO — pôr do sol laranja + palmeira branca em fundo preto.
- * Paleta: preto #0A0A0A, laranja #FF6B00, branco #FFFFFF
+ * Logo Marca RS TURISMO — Logo oficial (RS estilizado + carro + palmeira + arco)
  */
 export function LogoMarca({
   size = 40,
@@ -25,10 +24,8 @@ export function LogoMarca({
       <img
         src={logoDataUrl}
         alt="RS TURISMO"
-        width={size}
-        height={size}
-        className="shrink-0 rounded-xl object-contain bg-black"
-        style={{ width: size, height: size }}
+        className="shrink-0 h-auto w-auto object-contain rounded-lg bg-black"
+        style={{ height: size }}
       />
       {showText && (
         <div className="min-w-0">
@@ -44,15 +41,14 @@ export function LogoMarca({
   );
 }
 
-/** Apenas o ícone da logo (sol + palmeira). */
+/** Apenas o ícone da logo oficial. */
 export function LogoIcon({ size = 40, className }: { size?: number; className?: string }) {
   return (
     <img
       src={logoDataUrl}
       alt="RS TURISMO"
-      width={size}
-      height={size}
-      className={cn("shrink-0 rounded-xl object-contain bg-black", className)}
+      className={cn("shrink-0 h-auto w-auto object-contain rounded-xl bg-black", className)}
+      style={{ height: size }}
     />
   );
 }
