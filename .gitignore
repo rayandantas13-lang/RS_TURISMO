@@ -1,2 +1,5 @@
 node_modules/
 dist/
+
+# Testes locais de desenvolvimento (Apps Script + modo local)
+.scratch/

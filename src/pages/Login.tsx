@@ -4,6 +4,8 @@ import { api, modoLocal } from "@/api";
 import { Icon } from "@/components/Icon";
 import { Aviso, Botao, Campo, Entrada } from "@/components/ui";
 import { LogoIcon } from "@/components/Logo";
+import * as biometria from "@/lib/biometria";
+import type { CredencialBiometrica } from "@/lib/biometria";
 
 const vazio = {
   nome: "",
@@ -13,6 +15,19 @@ const vazio = {
   confirmar: "",
   chaveInstalacao: "",
 };
+
+/** Traduz erros do WebAuthn (DOMException) para mensagens amigáveis. */
+function mensagemBiometria(err: unknown) {
+  if (err instanceof DOMException) {
+    if (err.name === "NotAllowedError")
+      return "Leitura biométrica cancelada ou não reconhecida. Tente novamente ou use usuário e senha.";
+    if (err.name === "SecurityError")
+      return "A biometria não está disponível neste contexto (é preciso HTTPS).";
+    if (err.name === "NotSupportedError")
+      return "Este navegador ou dispositivo não suporta biometria.";
+  }
+  return err instanceof Error ? err.message : "Não foi possível entrar com a biometria.";
+}
 
 export default function Login({ aoEntrar }: { aoEntrar: (s: Sessao) => void }) {
   const [usuario, setUsuario] = useState("");
@@ -24,6 +39,13 @@ export default function Login({ aoEntrar }: { aoEntrar: (s: Sessao) => void }) {
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState("");
 
+  // Biometria (WebAuthn): suporte do navegador/aparelho e dispositivos já
+  // registrados neste navegador (a tela de login reconhece o aparelho).
+  const [biometriaPronta, setBiometriaPronta] = useState(false);
+  const [credenciais, setCredenciais] = useState<CredencialBiometrica[]>([]);
+  const [biometriaCarregando, setBiometriaCarregando] = useState(false);
+  const [ativacaoPendente, setAtivacaoPendente] = useState<Sessao | null>(null);
+
   const local = modoLocal();
 
   useEffect(() => {
@@ -33,17 +55,131 @@ export default function Login({ aoEntrar }: { aoEntrar: (s: Sessao) => void }) {
       .catch(() => setTemAdmin(null));
   }, []);
 
+  useEffect(() => {
+    let ativo = true;
+    void (async () => {
+      const suporta = biometria.suportada();
+      const plataforma = suporta ? await biometria.plataformaDisponivel() : false;
+      if (!ativo) return;
+      setBiometriaPronta(suporta && plataforma);
+      if (suporta) setCredenciais(biometria.credenciaisSalvas());
+    })();
+    return () => {
+      ativo = false;
+    };
+  }, []);
+
   const entrar = async (e: React.FormEvent) => {
     e.preventDefault();
     setCarregando(true);
     setErro("");
     try {
-      aoEntrar(await api.entrar(usuario.trim(), senha));
+      const s = await api.entrar(usuario.trim(), senha);
+      // Login por senha validado. Se o aparelho suporta biometria e ainda não
+      // foi ativada para este usuário, oferece a ativação antes de entrar.
+      if (biometriaPronta && !biometria.jaAtivada(s.usuario.id)) {
+        setAtivacaoPendente(s);
+        setSenha("");
+      } else {
+        aoEntrar(s);
+      }
     } catch (err) {
       setErro(err instanceof Error ? err.message : "Não foi possível entrar.");
     } finally {
       setCarregando(false);
     }
+  };
+
+  /** Ativa a biometria: janela nativa (Face ID/Touch ID/digital) + vínculo do
+   * token do usuário com a chave pública deste dispositivo. */
+  const ativar = async () => {
+    const s = ativacaoPendente;
+    if (!s) return;
+    setCarregando(true);
+    setErro("");
+    try {
+      const rpId = window.location.hostname;
+      const origem = window.location.origin;
+      const { desafio } = await api.biometriaIniciarRegistro(s.token, rpId, origem);
+      const registro = await biometria.registrar({
+        desafio,
+        rpId,
+        usuario: s.usuario,
+        credenciaisExistentes: biometria.credenciaisSalvas().map((c) => c.credentialId),
+      });
+      const { refreshToken } = await api.biometriaConcluirRegistro(s.token, {
+        credentialId: registro.credentialId,
+        attestationObject: registro.attestationObject,
+        clientDataJSON: registro.clientDataJSON,
+        rpId,
+        origem,
+      });
+      biometria.salvarCredencial({
+        usuarioId: s.usuario.id,
+        usuario: s.usuario.usuario,
+        nome: s.usuario.nome,
+        credentialId: registro.credentialId,
+        chavePublica: registro.chavePublica,
+        contador: registro.contador,
+        rpId,
+        origem,
+        refreshToken,
+        criadoEm: new Date().toISOString(),
+      });
+      aoEntrar(s);
+    } catch {
+      // Ativar biometria é opcional: o login por senha já foi validado.
+      aoEntrar(s);
+    } finally {
+      setCarregando(false);
+    }
+  };
+
+  /** Login rápido: leitura biométrica + sessão emitida sem digitar senha. */
+  const entrarComBiometria = async () => {
+    setErro("");
+    setBiometriaCarregando(true);
+    try {
+      const lista = biometria.credenciaisSalvas();
+      if (!lista.length)
+        throw new Error("Nenhum dispositivo com biometria ativada neste navegador.");
+      const alvo = lista[0];
+      const rpId = window.location.hostname;
+      const { desafio } = await api.biometriaDesafioLogin(alvo.credentialId);
+      const prova = await biometria.autenticar({
+        desafio,
+        rpId,
+        credencialIds: lista.map((c) => c.credentialId),
+      });
+      const escolhida = lista.find((c) => c.credentialId === prova.credentialId) ?? alvo;
+      const sessao = await api.biometriaEntrar({
+        credentialId: prova.credentialId,
+        refreshToken: escolhida.refreshToken,
+        clientDataJSON: prova.clientDataJSON,
+        authenticatorData: prova.authenticatorData,
+        signature: prova.signature,
+      });
+      aoEntrar(sessao);
+    } catch (err) {
+      setErro(mensagemBiometria(err));
+    } finally {
+      setBiometriaCarregando(false);
+    }
+  };
+
+  const removerDispositivo = async () => {
+    const lista = biometria.credenciaisSalvas();
+    if (!lista.length) return;
+    const nomes = [...new Set(lista.map((c) => c.nome || c.usuario))].join(", ");
+    const ok = window.confirm(
+      `Remover a biometria deste dispositivo (${nomes})? Os próximos logins voltam a pedir usuário e senha.`,
+    );
+    if (!ok) return;
+    for (const c of lista) {
+      await api.biometriaRemover(c.credentialId, c.refreshToken).catch(() => {});
+    }
+    biometria.removerTodasLocais();
+    setCredenciais([]);
   };
 
   const criarAdmin = async (e: React.FormEvent) => {
@@ -188,57 +324,123 @@ export default function Login({ aoEntrar }: { aoEntrar: (s: Sessao) => void }) {
                 Voltar para o login
               </button>
             </form>
+          ) : ativacaoPendente ? (
+            <div className="space-y-3.5">
+              <div className="flex items-start gap-3 rounded-2xl bg-gradient-to-br from-orange-50 to-amber-50 p-4 ring-1 ring-orange-200">
+                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[#FF6B00] to-[#FF8C33] text-white shadow-md shadow-orange-600/30">
+                  <Icon name="key" className="size-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-bold text-zinc-900">Ativar Face ID / Digital?</p>
+                  <p className="mt-0.5 text-xs leading-relaxed text-zinc-500">
+                    Faça os próximos logins instantaneamente usando a biometria nativa deste
+                    dispositivo.
+                  </p>
+                </div>
+              </div>
+
+              <Botao icone="key" carregando={carregando} onClick={ativar} className="w-full py-3">
+                Ativar Biometria e Entrar
+              </Botao>
+              <button
+                type="button"
+                onClick={() => aoEntrar(ativacaoPendente)}
+                className="w-full text-xs font-semibold text-zinc-500 hover:text-zinc-800"
+              >
+                Agora não, entrar sem biometria
+              </button>
+            </div>
           ) : (
-            <form onSubmit={entrar} className="space-y-3.5">
-              <Campo rotulo="Usuário ou e-mail">
-                <Entrada
-                  required
-                  value={usuario}
-                  onChange={(e) => setUsuario(e.target.value)}
-                  placeholder="admin"
-                  autoComplete="username"
-                  autoFocus
-                />
-              </Campo>
-              <Campo rotulo="Senha">
-                <div className="relative">
-                  <Entrada
-                    required
-                    type={verSenha ? "text" : "password"}
-                    value={senha}
-                    onChange={(e) => setSenha(e.target.value)}
-                    placeholder="••••••••"
-                    autoComplete="current-password"
-                    className="pr-11"
-                  />
+            <div className="space-y-3.5">
+              {credenciais.length > 0 && (
+                <div className="space-y-2.5">
                   <button
                     type="button"
-                    onClick={() => setVerSenha(!verSenha)}
-                    className="absolute top-1/2 right-2 -translate-y-1/2 rounded-lg p-2 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
-                    aria-label={verSenha ? "Ocultar senha" : "Mostrar senha"}
+                    onClick={entrarComBiometria}
+                    disabled={biometriaCarregando}
+                    className="flex w-full items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-br from-[#FF6B00] to-[#FF8C33] px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-orange-600/25 transition-all hover:shadow-orange-600/40 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    <Icon name={verSenha ? "eyeOff" : "eye"} className="size-4" />
+                    {biometriaCarregando ? (
+                      <Icon name="refresh" className="size-5 animate-spin" />
+                    ) : (
+                      <Icon name="key" className="size-5" />
+                    )}
+                    {biometriaCarregando ? "Lendo biometria..." : "Entrar com Face ID / Digital"}
                   </button>
+                  <p className="text-center text-[11px] text-zinc-400">
+                    Reconhecemos este dispositivo
+                    {credenciais[0] && ` · ${credenciais[0].nome || credenciais[0].usuario}`}
+                    {credenciais.length > 1 ? ` e mais ${credenciais.length - 1}` : ""}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={removerDispositivo}
+                    className="mx-auto flex items-center gap-1 text-[11px] font-semibold text-zinc-400 transition hover:text-rose-600"
+                  >
+                    <Icon name="trash" className="size-3" />
+                    Remover este dispositivo
+                  </button>
+                  <div className="flex items-center gap-3 pt-1">
+                    <span className="h-px flex-1 bg-zinc-100" />
+                    <span className="text-[10px] font-bold tracking-widest text-zinc-300 uppercase">
+                      ou entre com senha
+                    </span>
+                    <span className="h-px flex-1 bg-zinc-100" />
+                  </div>
                 </div>
-              </Campo>
-
-              <Botao icone="logout" carregando={carregando} className="w-full py-3">
-                Entrar na RS TURISMO
-              </Botao>
-
-              {temAdmin === false && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCriando(true);
-                    setErro("");
-                  }}
-                  className="flex w-full items-center justify-center gap-1.5 text-xs font-semibold text-zinc-500 hover:text-orange-600"
-                >
-                  <Icon name="plus" className="size-3.5" /> Primeiro acesso: criar administrador
-                </button>
               )}
-            </form>
+
+              <form onSubmit={entrar} className="space-y-3.5">
+                <Campo rotulo="Usuário ou e-mail">
+                  <Entrada
+                    required
+                    value={usuario}
+                    onChange={(e) => setUsuario(e.target.value)}
+                    placeholder="admin"
+                    autoComplete="username"
+                    autoFocus
+                  />
+                </Campo>
+                <Campo rotulo="Senha">
+                  <div className="relative">
+                    <Entrada
+                      required
+                      type={verSenha ? "text" : "password"}
+                      value={senha}
+                      onChange={(e) => setSenha(e.target.value)}
+                      placeholder="••••••••"
+                      autoComplete="current-password"
+                      className="pr-11"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setVerSenha(!verSenha)}
+                      className="absolute top-1/2 right-2 -translate-y-1/2 rounded-lg p-2 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
+                      aria-label={verSenha ? "Ocultar senha" : "Mostrar senha"}
+                    >
+                      <Icon name={verSenha ? "eyeOff" : "eye"} className="size-4" />
+                    </button>
+                  </div>
+                </Campo>
+
+                <Botao icone="logout" carregando={carregando} className="w-full py-3">
+                  Entrar na RS TURISMO
+                </Botao>
+
+                {temAdmin === false && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCriando(true);
+                      setErro("");
+                    }}
+                    className="flex w-full items-center justify-center gap-1.5 text-xs font-semibold text-zinc-500 hover:text-orange-600"
+                  >
+                    <Icon name="plus" className="size-3.5" /> Primeiro acesso: criar administrador
+                  </button>
+                )}
+              </form>
+            </div>
           )}
 
           {erro && (

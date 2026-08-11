@@ -52,6 +52,27 @@ Não existe mais usuário ou senha padrão. No primeiro acesso, crie o administr
 
 Sem conectar o Google Sheets, o sistema abre em **modo local** com vouchers fictícios de exemplo. Esse modo serve para demonstração; dados reais devem ser armazenados no Google Sheets.
 
+## Login com Face ID / Digital (biometria)
+
+Depois de entrar com usuário e senha, se o aparelho (iPhone, Android ou computador) tiver biometria nativa, a tela de login oferece:
+
+> **Ativar Face ID / Digital?** — Faça os próximos logins instantaneamente usando a biometria nativa deste dispositivo.
+
+Ao tocar em **Ativar Biometria e Entrar**, o navegador abre a janela nativa do aparelho (Face ID, Touch ID ou leitor de digital). A chave privada fica no cofre do dispositivo e **nunca sai dele**; o servidor guarda apenas a chave **pública** na aba `Biometria` da planilha, junto com o HMAC do token de longa duração que fica salvo no próprio aparelho (o token do usuário é vinculado à chave pública do dispositivo).
+
+Nas próximas visitas à tela de login, o sistema reconhece o aparelho e mostra o botão de destaque:
+
+> **🔑 Entrar com Face ID / Digital**
+
+Toque no botão, faça a leitura biométrica e entre sem digitar a senha. A leitura é validada pelo servidor (desafio de uso único + assinatura ECDSA/P-256), então o token salvo no navegador sozinho não abre a sessão.
+
+Requisitos e detalhes:
+
+- O site precisa estar em **HTTPS** (o GitHub Pages já entrega) ou em `localhost` — WebAuthn não funciona em HTTP comum.
+- Funciona por **dispositivo**: cada aparelho registra a própria credencial (limite de 10 por usuário). Para desfazer, use **Remover este dispositivo** na tela de login.
+- Em navegadores sem biometria o botão simplesmente não aparece e o login por senha continua como sempre.
+- O código de apoio está em `src/lib/biometria.ts`; o backend (validação no Apps Script) fica no mesmo `Code.gs`.
+
 ## Conectar o Google Sheets
 
 1. Crie uma planilha e abra **Extensões → Apps Script**
@@ -64,13 +85,13 @@ Sem conectar o Google Sheets, o sistema abre em **modo local** com vouchers fict
 6. Copie a URL terminada em `/exec`
 7. No primeiro acesso, informe a chave para criar o administrador principal; ela é invalidada automaticamente depois do uso
 
-Abas criadas automaticamente: `Usuarios`, `Vouchers`, `Config`, `Sessoes`, `Auditoria`.
+Abas criadas automaticamente: `Usuarios`, `Vouchers`, `Config`, `Sessoes`, `Auditoria`, `Biometria`.
 
 Na aba `Vouchers`, além dos dados brutos, as colunas **servicos**, **datas** e **aReceber** são preenchidas sozinhas para você conseguir ler e filtrar direto na planilha.
 
 ### Sempre que o `Code.gs` mudar, reimplante
 
-O Google continua servindo a **versão publicada** do script: salvar o arquivo no editor não muda nada para o site. Se a implantação estiver velha, o painel conecta normalmente, mas o Apps Script **descarta campos que ainda não conhece** ao gravar — foi o que fez o **desconto** sumir depois de atualizar a página (e, antes dele, "O que levar", "Informações adicionais" e a data/hora de volta).
+O Google continua servindo a **versão publicada** do script: salvar o arquivo no editor não muda nada para o site. Se a implantação estiver velha, o painel conecta normalmente, mas o Apps Script **descarta campos que ainda não conhece** ao gravar — foi o que fez o **desconto** sumir depois de atualizar a página (e, antes dele, "O que levar", "Informações adicionais", a data/hora de volta e o login por **Face ID / Digital**).
 
 Planilhas criadas com o Code.gs antigo também são corrigidas sozinhas: na primeira requisição com o script novo, o cabeçalho da aba `Vouchers` ganha as colunas que faltam (ex.: `tipoDesconto` e `desconto`) e os dados já gravados são movidos para as colunas certas pelo nome do cabeçalho, sem perder nada.
 

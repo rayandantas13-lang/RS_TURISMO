@@ -1,4 +1,5 @@
 import type { Config, DadosApi, GastoOperacional, Sessao, Usuario, Voucher } from "@/types";
+import { requisicaoLocal } from "@/localBackend";
 
 
 interface RespostaApi<T = unknown> {
@@ -22,11 +23,12 @@ const HOST_CONTEUDO = "script.googleusercontent.com";
  * Versão do google-apps-script/Code.gs que este site espera encontrar
  * publicado. Quando a planilha responde uma versão menor, o Apps Script no ar
  * é anterior aos campos novos (desconto, o que levar, informações adicionais,
- * data/hora de volta) e descarta silenciosamente esses dados ao salvar — era
- * isso que fazia o desconto sumir depois de atualizar a página. Nesse caso o
- * painel avisa em vez de deixar o usuário perder dados sem perceber.
+ * data/hora de volta e a biometria Face ID / Digital) e descarta
+ * silenciosamente esses dados ao salvar — era isso que fazia o desconto sumir
+ * depois de atualizar a página. Nesse caso o painel avisa em vez de deixar o
+ * usuário perder dados sem perceber.
  */
-export const VERSAO_ESPERADA = 5;
+export const VERSAO_ESPERADA = 6;
 
 /** true quando a implantação publicada é anterior à esperada por este site. */
 export function versaoDesatualizada(versao: unknown) {
@@ -35,11 +37,11 @@ export function versaoDesatualizada(versao: unknown) {
 }
 
 export const AVISO_IMPLANTACAO_ANTIGA =
-  "O Apps Script publicado está desatualizado: o desconto (e os campos “O que " +
-  "levar”, “Informações adicionais” e a data/hora de volta) não é gravado na " +
-  "planilha — por isso ele some depois de atualizar a página. Abra o Apps " +
-  "Script, cole o Code.gs mais recente e use Implantar → Gerenciar implantações " +
-  "→ ✏️ → Versão: Nova versão.";
+  "O Apps Script publicado está desatualizado: o desconto, a biometria " +
+  "(Face ID / Digital) e os campos “O que levar”, “Informações adicionais” e a " +
+  "data/hora de volta não são gravados na planilha — por isso eles somem depois " +
+  "de atualizar a página. Abra o Apps Script, cole o Code.gs mais recente e use " +
+  "Implantar → Gerenciar implantações → ✏️ → Versão: Nova versão.";
 
 /** Ações que podem ser repetidas sem risco de duplicar dados na planilha. */
 const ACOES_REPETIVEIS = new Set([
@@ -269,7 +271,7 @@ async function enviar<T>(url: string, payload: Record<string, unknown>): Promise
 
 async function req<T>(payload: Record<string, unknown>): Promise<T> {
   const url = urlApi();
-  if (!url) throw new ErroApi("URL do Apps Script não configurada. Vá em Configurações → Banco de dados e cole a URL terminada em /exec para que os dados fiquem salvos em todos os acessos.", false);
+  if (!url) return requisicaoLocal<T>(payload);
   return enviar<T>(url, payload);
 }
 
@@ -390,6 +392,37 @@ export const api = {
   }) => req<Sessao>({ acao: "criarPrimeiroAdmin", ...p }),
   eu: (token: string) => req<Usuario>({ acao: "eu", token }),
   sair: (token: string) => req<void>({ acao: "sair", token }),
+
+  /* -------- Biometria (Face ID / Touch ID / digital — WebAuthn) -------- */
+
+  /** Passo 1 da ativação (logado): servidor gera o desafio de registro. */
+  biometriaIniciarRegistro: (token: string, rpId: string, origem: string) =>
+    req<{ desafio: string }>({ acao: "biometriaIniciarRegistro", token, rpId, origem }),
+  /** Passo 3 da ativação: valida o registro e devolve o token do dispositivo. */
+  biometriaConcluirRegistro: (
+    token: string,
+    dados: {
+      credentialId: string;
+      attestationObject: string;
+      clientDataJSON: string;
+      rpId: string;
+      origem: string;
+    },
+  ) => req<{ refreshToken: string }>({ acao: "biometriaConcluirRegistro", token, ...dados }),
+  /** Passo 1 do login biométrico (público): desafio para a credencial. */
+  biometriaDesafioLogin: (credentialId: string) =>
+    req<{ desafio: string }>({ acao: "biometriaDesafioLogin", credentialId }),
+  /** Passo 3 do login biométrico (público): valida a leitura e entra. */
+  biometriaEntrar: (dados: {
+    credentialId: string;
+    refreshToken: string;
+    clientDataJSON: string;
+    authenticatorData: string;
+    signature: string;
+  }) => req<Sessao>({ acao: "biometriaEntrar", ...dados }),
+  /** Remove este dispositivo (exige o token do próprio aparelho). */
+  biometriaRemover: (credentialId: string, refreshToken: string) =>
+    req<void>({ acao: "biometriaRemover", credentialId, refreshToken }),
 
   dados: (token: string) => req<DadosApi>({ acao: "dados", token }),
 
