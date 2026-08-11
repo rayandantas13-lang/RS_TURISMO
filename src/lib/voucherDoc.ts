@@ -148,9 +148,9 @@ class PDFVoucherBuilder {
     this.doc.setFillColor(...CORES.secundaria);
     this.doc.triangle(this.L - 55, 0, this.L, 0, this.L, ALT_BANNER, "F");
 
-    // Marca oficial (PNG leve) embutida no bundle para offline.
-    // Proporção 795:527 (1.5:1) mantida sem distorção.
-    this.doc.addImage(logoDataUrl, "PNG", this.M - 1, 5, 35, 23, undefined, "FAST");
+    // Marca oficial vetorizada (PNG gerada a partir do SVG original)
+    // Proporção 768:515 (1.49:1) mantida perfeitamente.
+    this.doc.addImage(logoDataUrl, "PNG", this.M - 1, 5, 34, 22.8, undefined, "FAST");
 
 
     // Nome da empresa
