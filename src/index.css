@@ -3,6 +3,12 @@
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  /* RS TURISMO - Paleta oficial */
+  --color-rs-black: #0A0A0A;
+  --color-rs-orange: #FF6B00;
+  --color-rs-orange-light: #FF8C33;
+  --color-rs-orange-dark: #E55A00;
+  --color-rs-white: #FFFFFF;
 }
 
 html {
@@ -11,14 +17,14 @@ html {
 
 body {
   font-family: var(--font-sans);
-  background-color: #f1f5f9;
-  color: #0f172a;
+  background-color: #f9fafb;
+  color: #0a0a0a;
   -webkit-font-smoothing: antialiased;
 }
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 transparent;
+  scrollbar-color: #FF6B00 transparent;
 }
 
 *::-webkit-scrollbar {
@@ -26,20 +32,17 @@ body {
   height: 8px;
 }
 *::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #FF6B00;
   border-radius: 999px;
   border: 2px solid transparent;
   background-clip: content-box;
 }
 *::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #E55A00;
   background-clip: content-box;
 }
 
-/*
- * Altura máxima do painel do modal: declaração dupla para os navegadores
- * antigos usarem `vh` e os modernos `dvh` (a segunda ganha quando existe).
- */
+/* Modal - RS TURISMO theme */
 .modal-panel {
   max-height: calc(100vh - 2.5rem);
   max-height: calc(100dvh - 2.5rem);
@@ -51,26 +54,24 @@ body {
   }
 }
 
-/* Barra de rolagem do corpo do modal: sempre visível e com contraste,
-   para ficar claro que dá para descer até os botões do rodapé. */
 .modal-scroll {
   scrollbar-width: thin;
-  scrollbar-color: #94a3b8 #f1f5f9;
+  scrollbar-color: #FF6B00 #f5f5f5;
 }
 .modal-scroll::-webkit-scrollbar {
   width: 9px;
 }
 .modal-scroll::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #f5f5f5;
   border-radius: 999px;
 }
 .modal-scroll::-webkit-scrollbar-thumb {
-  background: #94a3b8;
+  background: #FF6B00;
   border-radius: 999px;
-  border: 2px solid #f1f5f9;
+  border: 2px solid #f5f5f5;
 }
 .modal-scroll::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
+  background: #E55A00;
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator,
@@ -112,11 +113,6 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   }
 }
 
-/*
- * `backwards` (e não `both`): depois que a animação termina, o elemento
- * volta ao estilo natural, SEM manter `transform`. Um transform retido vira
- * bloco de contenção para `position: fixed` e quebra modais/menus fixos.
- */
 .anim-up {
   animation: gp-fade-up 0.35s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
@@ -148,4 +144,18 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     padding: 0 !important;
     width: 100% !important;
   }
+}
+
+/* RS TURISMO custom utilities */
+.bg-rs-gradient {
+  background: linear-gradient(135deg, #0A0A0A 0%, #1a1a1a 100%);
+}
+.bg-rs-gradient-orange {
+  background: linear-gradient(135deg, #FF6B00 0%, #FF8C33 100%);
+}
+.text-rs-orange {
+  color: #FF6B00;
+}
+.border-rs-orange {
+  border-color: #FF6B00;
 }

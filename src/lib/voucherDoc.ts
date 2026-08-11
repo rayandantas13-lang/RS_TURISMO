@@ -19,18 +19,18 @@ import {
 } from "@/lib/utils";
 
 /* ============================================================
-   CORES
+   CORES - RS TURISMO - Preto, Laranja e Branco
    ============================================================ */
 const CORES = {
-  primaria: [3, 105, 161] as [number, number, number],      // azul oceano #0369A1
-  secundaria: [217, 119, 6] as [number, number, number],    // dourado #D97706
-  escuro: [15, 23, 42] as [number, number, number],
-  cinza: [100, 116, 139] as [number, number, number],
-  cinzaClaro: [148, 163, 184] as [number, number, number],
-  fundo: [241, 245, 249] as [number, number, number],
+  primaria: [10, 10, 10] as [number, number, number],      // preto RS #0A0A0A
+  secundaria: [255, 107, 0] as [number, number, number],   // laranja RS #FF6B00
+  escuro: [10, 10, 10] as [number, number, number],        // preto
+  cinza: [100, 100, 100] as [number, number, number],
+  cinzaClaro: [200, 200, 200] as [number, number, number],
+  fundo: [249, 250, 251] as [number, number, number],      // zinc-50
   branco: [255, 255, 255] as [number, number, number],
   sucesso: [34, 197, 94] as [number, number, number],
-  destaque: [251, 191, 36] as [number, number, number],     // dourado claro #FBBF24
+  destaque: [255, 107, 0] as [number, number, number],     // laranja destaque #FF6B00
 };
 
 /** Cor do selo de status no PDF (combinando com as cores do app). */
@@ -136,15 +136,15 @@ class PDFVoucherBuilder {
      MÉTODOS DE CONSTRUÇÃO
      ============================================================ */
 
-  // 1. CABEÇALHO
+  // 1. CABEÇALHO - RS TURISMO Preto + Laranja
   private construirCabecalho(config: Config, voucher: Voucher) {
     const ALT_BANNER = 40;
 
-    // Fundo azul oceano
+    // Fundo preto RS TURISMO
     this.doc.setFillColor(...CORES.primaria);
     this.doc.rect(0, 0, this.L, ALT_BANNER, "F");
 
-    // Detalhe triangular dourado
+    // Detalhe triangular laranja
     this.doc.setFillColor(...CORES.secundaria);
     this.doc.triangle(this.L - 55, 0, this.L, 0, this.L, ALT_BANNER, "F");
 

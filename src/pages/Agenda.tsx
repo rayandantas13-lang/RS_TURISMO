@@ -119,7 +119,7 @@ export default function Agenda({ ir }: { ir: (r: string) => void }) {
                 onClick={() => setVisao(v)}
                 className={cn(
                   "rounded-lg px-3.5 py-1.5 text-xs font-bold capitalize transition",
-                  visao === v ? "bg-white text-sky-700 shadow-sm" : "text-slate-500",
+                  visao === v ? "bg-white text-orange-700 shadow-sm" : "text-slate-500",
                 )}
               >
                 {v}
@@ -149,7 +149,7 @@ export default function Agenda({ ir }: { ir: (r: string) => void }) {
               />
               <button
                 onClick={() => setAncora(startOfWeek(new Date()))}
-                className="rounded-lg px-3 py-1.5 text-xs font-bold text-sky-600 hover:bg-sky-50"
+                className="rounded-lg px-3 py-1.5 text-xs font-bold text-orange-600 hover:bg-orange-50"
               >
                 Hoje
               </button>
@@ -164,7 +164,7 @@ export default function Agenda({ ir }: { ir: (r: string) => void }) {
             </div>
             <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-600">
               <span className="flex items-center gap-1.5">
-                <Icon name="ticket" className="size-3.5 text-sky-500" /> {totais.passeios} passeios
+                <Icon name="ticket" className="size-3.5 text-orange-500" /> {totais.passeios} passeios
               </span>
               <span className="flex items-center gap-1.5">
                 <Icon name="users" className="size-3.5 text-amber-500" /> {totais.pessoas} pessoas
@@ -186,14 +186,14 @@ export default function Agenda({ ir }: { ir: (r: string) => void }) {
                     className={cn(
                       "flex min-h-[400px] flex-col rounded-2xl bg-white ring-1 transition",
                       ehHoje
-                        ? "shadow-md ring-2 shadow-sky-500/10 ring-sky-500"
+                        ? "shadow-md ring-2 shadow-orange-500/10 ring-orange-500"
                         : "ring-slate-200/80",
                     )}
                   >
                     <div
                       className={cn(
                         "flex items-center justify-between rounded-t-2xl px-3 py-2.5",
-                        ehHoje ? "bg-sky-600 text-white" : "bg-slate-50 text-slate-600",
+                        ehHoje ? "bg-orange-600 text-white" : "bg-slate-50 text-slate-600",
                       )}
                     >
                       <div>
@@ -215,7 +215,7 @@ export default function Agenda({ ir }: { ir: (r: string) => void }) {
                           <span
                             className={cn(
                               "mt-1 block text-[10px] font-bold",
-                              ehHoje ? "text-sky-100" : "text-slate-400",
+                              ehHoje ? "text-orange-100" : "text-slate-400",
                             )}
                           >
                             {pessoas} pax
@@ -235,7 +235,7 @@ export default function Agenda({ ir }: { ir: (r: string) => void }) {
                               ? "border-slate-300 bg-slate-50 opacity-60"
                               : e.v.status === "pendente"
                                 ? "border-amber-500 bg-amber-50/70 hover:bg-amber-50"
-                                : "border-sky-500 bg-sky-50/70 hover:bg-sky-50",
+                                : "border-orange-500 bg-orange-50/70 hover:bg-orange-50",
                           )}
                         >
                           <div className="flex items-center gap-1.5">
@@ -370,7 +370,7 @@ export default function Agenda({ ir }: { ir: (r: string) => void }) {
           <aside className="anim-slide relative flex h-full w-full max-w-md flex-col bg-white shadow-2xl">
             <header className="flex items-start justify-between gap-3 border-b border-slate-100 p-5">
               <div className="min-w-0">
-                <p className="font-mono text-xs font-bold text-sky-600">{aberto.v.codigo}</p>
+                <p className="font-mono text-xs font-bold text-orange-600">{aberto.v.codigo}</p>
                 <h2 className="truncate text-lg font-bold text-slate-900">{aberto.p.nome}</h2>
                 <p className="text-sm text-slate-500">
                   {dataBR(aberto.p.data)}{aberto.p.hora ? ` às ${aberto.p.hora} (ida)` : ""}

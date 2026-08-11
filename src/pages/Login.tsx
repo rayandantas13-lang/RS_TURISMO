@@ -77,23 +77,31 @@ export default function Login({ aoEntrar }: { aoEntrar: (s: Sessao) => void }) {
     }
   };
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-100 p-4">
-      <div className="absolute -top-40 -left-32 size-[28rem] rounded-full bg-sky-500/20 blur-3xl" />
-      <div className="absolute -right-32 -bottom-40 size-[28rem] rounded-full bg-amber-400/15 blur-3xl" />
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#0A0A0A] p-4">
+      <div className="absolute -top-40 -left-32 size-[28rem] rounded-full bg-orange-500/20 blur-3xl" />
+      <div className="absolute -right-32 -bottom-40 size-[28rem] rounded-full bg-orange-400/10 blur-3xl" />
+      <div className="absolute top-1/2 left-1/2 size-[40rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-orange-500/5 via-transparent to-transparent blur-3xl" />
 
       <div className="anim-up relative w-full max-w-md">
         <div className="mb-7 text-center">
           <div className="flex justify-center">
-            <LogoIcon size={72} />
+            <LogoIcon size={80} className="ring-2 ring-orange-500/20 shadow-xl shadow-orange-500/10" />
           </div>
-          <h1 className="mt-5 text-2xl font-extrabold tracking-tight text-slate-900">Vem Pra Porto</h1>
-          <p className="mt-1 text-sm text-slate-500">Painel administrativo</p>
+          <h1 className="mt-5 text-3xl font-extrabold tracking-tight text-white">RS TURISMO</h1>
+          <p className="mt-1 flex items-center justify-center gap-2 text-sm text-zinc-400">
+            <span className="size-1.5 rounded-full bg-orange-500" />
+            Painel administrativo
+            <span className="size-1.5 rounded-full bg-orange-500" />
+          </p>
+          <p className="mt-1 text-[11px] font-semibold tracking-widest text-orange-400 uppercase">Preto • Laranja • Branco</p>
         </div>
 
-        <div className="rounded-3xl bg-white p-6 shadow-xl shadow-slate-300/40 ring-1 ring-slate-200">
+        <div className="rounded-3xl bg-white p-6 shadow-2xl shadow-black/50 ring-1 ring-zinc-200">
           <div className="mb-5 flex items-center gap-2">
-            <Icon name={criando ? "user" : "lock"} className="size-4 text-sky-600" />
-            <h2 className="font-bold text-slate-900">
+            <span className="grid size-8 place-items-center rounded-lg bg-orange-50 text-orange-600 ring-1 ring-orange-100">
+              <Icon name={criando ? "user" : "lock"} className="size-4" />
+            </span>
+            <h2 className="font-bold text-zinc-900">
               {criando ? "Criar administrador" : "Entrar no sistema"}
             </h2>
           </div>
@@ -101,7 +109,7 @@ export default function Login({ aoEntrar }: { aoEntrar: (s: Sessao) => void }) {
           {criando ? (
             <form onSubmit={criarAdmin} className="space-y-3.5">
               <Aviso tom="info">
-                Crie o administrador principal. Depois disso, novos usuários só podem ser
+                Crie o administrador principal da RS TURISMO. Depois disso, novos usuários só podem ser
                 cadastrados dentro de Configurações.
               </Aviso>
               {!local && (
@@ -130,7 +138,7 @@ export default function Login({ aoEntrar }: { aoEntrar: (s: Sessao) => void }) {
                   type="email"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  placeholder="admin@empresa.com"
+                  placeholder="admin@rsturismo.com"
                 />
               </Campo>
               <Campo rotulo="Usuário *">
@@ -175,7 +183,7 @@ export default function Login({ aoEntrar }: { aoEntrar: (s: Sessao) => void }) {
                   setCriando(false);
                   setErro("");
                 }}
-                className="w-full text-xs font-semibold text-slate-500 hover:text-slate-800"
+                className="w-full text-xs font-semibold text-zinc-500 hover:text-zinc-800"
               >
                 Voltar para o login
               </button>
@@ -206,7 +214,7 @@ export default function Login({ aoEntrar }: { aoEntrar: (s: Sessao) => void }) {
                   <button
                     type="button"
                     onClick={() => setVerSenha(!verSenha)}
-                    className="absolute top-1/2 right-2 -translate-y-1/2 rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                    className="absolute top-1/2 right-2 -translate-y-1/2 rounded-lg p-2 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
                     aria-label={verSenha ? "Ocultar senha" : "Mostrar senha"}
                   >
                     <Icon name={verSenha ? "eyeOff" : "eye"} className="size-4" />
@@ -215,7 +223,7 @@ export default function Login({ aoEntrar }: { aoEntrar: (s: Sessao) => void }) {
               </Campo>
 
               <Botao icone="logout" carregando={carregando} className="w-full py-3">
-                Entrar
+                Entrar na RS TURISMO
               </Botao>
 
               {temAdmin === false && (
@@ -225,7 +233,7 @@ export default function Login({ aoEntrar }: { aoEntrar: (s: Sessao) => void }) {
                     setCriando(true);
                     setErro("");
                   }}
-                  className="flex w-full items-center justify-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-sky-700"
+                  className="flex w-full items-center justify-center gap-1.5 text-xs font-semibold text-zinc-500 hover:text-orange-600"
                 >
                   <Icon name="plus" className="size-3.5" /> Primeiro acesso: criar administrador
                 </button>
@@ -240,13 +248,19 @@ export default function Login({ aoEntrar }: { aoEntrar: (s: Sessao) => void }) {
           )}
 
           {local && (
-            <p className="mt-3 text-[11px] leading-relaxed text-slate-400">
+            <p className="mt-3 text-[11px] leading-relaxed text-zinc-400">
               Entre como administrador e conecte o Google Sheets em{" "}
-              <b className="text-slate-500">Configurações → Banco de dados</b>. Você também pode
+              <b className="text-zinc-500">Configurações → Banco de dados</b>. Você também pode
               definir a variável <code className="font-mono">VITE_APPS_SCRIPT_URL</code> no GitHub.
             </p>
           )}
 
+          <div className="mt-6 flex items-center justify-center gap-2 border-t border-zinc-100 pt-4 text-[11px] text-zinc-400">
+            <span className="size-1.5 rounded-full bg-black" />
+            <span className="size-1.5 rounded-full bg-orange-500" />
+            <span className="size-1.5 rounded-full bg-white ring-1 ring-zinc-200" />
+            <span className="ml-1 font-semibold tracking-wide text-zinc-500">RS TURISMO • Preto Laranja Branco</span>
+          </div>
         </div>
       </div>
     </div>

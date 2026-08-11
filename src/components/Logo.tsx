@@ -2,8 +2,8 @@ import { cn } from "@/utils/cn";
 import { logoDataUrl } from "@/assets/logoData";
 
 /**
- * Logo "Vem Pra Porto" — onda do mar + sol do pôr do sol.
- * Pode ser usada como ícone (showText=false) ou com o nome da empresa.
+ * Logo RS TURISMO — pôr do sol laranja + palmeira branca em fundo preto.
+ * Paleta: preto #0A0A0A, laranja #FF6B00, branco #FFFFFF
  */
 export function LogoMarca({
   size = 40,
@@ -11,7 +11,7 @@ export function LogoMarca({
   className,
   textClassName,
   subClassName,
-  subtitulo = "Controle de vouchers",
+  subtitulo = "Turismo & Passeios",
 }: {
   size?: number;
   showText?: boolean;
@@ -24,18 +24,18 @@ export function LogoMarca({
     <div className={cn("flex items-center gap-3", className)}>
       <img
         src={logoDataUrl}
-        alt="Vem Pra Porto — Porto Seguro, BA"
+        alt="RS TURISMO"
         width={size}
         height={size}
-        className="shrink-0 rounded-xl object-contain"
+        className="shrink-0 rounded-xl object-contain bg-black"
         style={{ width: size, height: size }}
       />
       {showText && (
         <div className="min-w-0">
-          <p className={cn("truncate text-sm font-extrabold tracking-tight text-white", textClassName)}>
-            Vem Pra Porto
+          <p className={cn("truncate text-[15px] font-extrabold tracking-tight text-white", textClassName)}>
+            RS TURISMO
           </p>
-          <p className={cn("truncate text-[11px] text-sky-300", subClassName)}>
+          <p className={cn("truncate text-[11px] font-semibold tracking-wide text-orange-400", subClassName)}>
             {subtitulo}
           </p>
         </div>
@@ -44,23 +44,15 @@ export function LogoMarca({
   );
 }
 
-/** Apenas o ícone da logo (onda + sol). */
+/** Apenas o ícone da logo (sol + palmeira). */
 export function LogoIcon({ size = 40, className }: { size?: number; className?: string }) {
   return (
     <img
       src={logoDataUrl}
-      alt="Vem Pra Porto — Porto Seguro, BA"
+      alt="RS TURISMO"
       width={size}
       height={size}
-      className={cn("shrink-0 rounded-xl object-contain", className)}
+      className={cn("shrink-0 rounded-xl object-contain bg-black", className)}
     />
   );
 }
-
-/*
-  A marca oficial fica embutida no bundle para também estar disponível quando
-  o voucher é gerado offline e dentro do PDF.
-*/
-/*
-  SVG antigo removido: a imagem oficial é usada acima.
-*/
