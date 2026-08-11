@@ -25,7 +25,7 @@ const HOST_CONTEUDO = "script.googleusercontent.com";
  * é anterior aos campos novos (desconto, o que levar, informações adicionais,
  * data/hora de volta) e descarta silenciosamente esses dados ao salvar — era
  * isso que fazia o desconto sumir depois de atualizar a página. A versão 8
- * também deixa a sessão valer por 30 dias e a renova automaticamente. Nesse
+ * também deixa a sessão valer por 10 dias e a renova automaticamente. Nesse
  * caso o painel avisa em vez de deixar o usuário perder dados sem perceber.
  */
 export const VERSAO_ESPERADA = 8;

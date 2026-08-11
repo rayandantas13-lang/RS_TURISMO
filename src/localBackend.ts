@@ -11,7 +11,7 @@ import { uid } from "@/lib/utils";
 
 const DB_KEY = "vempraporto.local.v2";
 const ADMIN_DEMO_LEGADO = { usuario: "admin", senhaHash: "local_oqacq9_17" };
-const HORAS_SESSAO = 30 * 24;
+const HORAS_SESSAO = 10 * 24;
 
 interface UsuarioLocal extends Usuario {
   senhaHash: string;

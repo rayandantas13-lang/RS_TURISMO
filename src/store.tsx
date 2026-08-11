@@ -27,7 +27,7 @@ function sessaoValida(s: unknown): s is Sessao {
 }
 
 /**
- * A sessão fica neste navegador (localStorage) e vale por várias semanas.
+ * A sessão fica neste navegador (localStorage) e vale por 10 dias.
  * Assim o painel continua conectado ao fechar a aba, o celular ou o Chrome.
  */
 function lerSessao(): Sessao | null {

@@ -70,7 +70,7 @@ Na aba `Vouchers`, além dos dados brutos, as colunas **servicos**, **datas** e 
 
 ### Sempre que o `Code.gs` mudar, reimplante
 
-O Google continua servindo a **versão publicada** do script: salvar o arquivo no editor não muda nada para o site. Se a implantação estiver velha, o painel conecta normalmente, mas o Apps Script **descarta campos que ainda não conhece** ao gravar — foi o que fez o **desconto** sumir depois de atualizar a página (e, antes dele, "O que levar", "Informações adicionais" e a data/hora de volta). A versão 8 deixa a sessão valer 30 dias e a renova automaticamente sempre que o painel é usado.
+O Google continua servindo a **versão publicada** do script: salvar o arquivo no editor não muda nada para o site. Se a implantação estiver velha, o painel conecta normalmente, mas o Apps Script **descarta campos que ainda não conhece** ao gravar — foi o que fez o **desconto** sumir depois de atualizar a página (e, antes dele, "O que levar", "Informações adicionais" e a data/hora de volta). A versão 8 deixa a sessão valer 10 dias e a renova automaticamente sempre que o painel é usado.
 
 Planilhas criadas com o Code.gs antigo também são corrigidas sozinhas: na primeira requisição com o script novo, o cabeçalho da aba `Vouchers` ganha as colunas que faltam (ex.: `tipoDesconto` e `desconto`) e os dados já gravados são movidos para as colunas certas pelo nome do cabeçalho, sem perder nada.
 
@@ -151,7 +151,7 @@ O menu fica oculto para operadores e o Apps Script bloqueia a chamada no servido
 - Todo o tráfego usa HTTPS e o Google também protege os arquivos armazenados na infraestrutura dele
 - No modo conectado, senhas nunca são gravadas em texto: ficam como HMAC SHA-256 com salt e um segredo exclusivo guardado nas propriedades privadas do Apps Script
 - Tokens de sessão nunca são gravados em formato utilizável na planilha; somente o HMAC do token é armazenado
-- A sessão fica salva neste navegador, vale 30 dias no servidor e é renovada automaticamente sempre que o painel é usado — só cai se você clicar em Sair
+- A sessão fica salva neste navegador, vale 10 dias no servidor e é renovada automaticamente sempre que o painel é usado — só cai se você clicar em Sair
 - Cinco tentativas incorretas bloqueiam temporariamente novas tentativas para o mesmo usuário
 - A criação do primeiro administrador exige uma chave de instalação aleatória e de uso único
 - Toda entrada é validada no servidor e textos são neutralizados para impedir injeção de fórmulas na planilha

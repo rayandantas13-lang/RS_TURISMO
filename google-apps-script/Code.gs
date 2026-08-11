@@ -26,10 +26,10 @@ var SEGURANCA = {
   // que o esperado pelo site, o painel avisa que a implantação está velha.
   // v4: desconto (tipoDesconto/desconto) gravado na planilha + migração
   //     automática de abas criadas com layout antigo.
-  // v8: sessão longa (30 dias) renovada automaticamente; sem biometria.
+  // v8: sessão longa (10 dias) renovada automaticamente; sem biometria.
   versao: '8',
   tamanhoMaximoRequisicao: 300000,
-  horasSessao: 30 * 24,
+  horasSessao: 10 * 24,
   maxTentativasLogin: 5,
   bloqueioLoginSegundos: 15 * 60,
   maxRegistrosAuditoria: 5000
