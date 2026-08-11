@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Sessao } from "@/types";
 import { api, modoLocal } from "@/api";
 import { Icon } from "@/components/Icon";
@@ -45,6 +45,9 @@ export default function Login({ aoEntrar }: { aoEntrar: (s: Sessao) => void }) {
   const [credenciais, setCredenciais] = useState<CredencialBiometrica[]>([]);
   const [biometriaCarregando, setBiometriaCarregando] = useState(false);
   const [ativacaoPendente, setAtivacaoPendente] = useState<Sessao | null>(null);
+  // A tentativa automática deve acontecer uma única vez por abertura da tela.
+  // O ref também evita duas janelas de Face ID/Digital no StrictMode do React.
+  const tentativaAutomaticaRef = useRef(false);
 
   const local = modoLocal();
 
@@ -127,45 +130,95 @@ export default function Login({ aoEntrar }: { aoEntrar: (s: Sessao) => void }) {
         criadoEm: new Date().toISOString(),
       });
       aoEntrar(s);
-    } catch {
-      // Ativar biometria é opcional: o login por senha já foi validado.
-      aoEntrar(s);
+    } catch (err) {
+      // Não entre silenciosamente como se a biometria tivesse sido salva. O
+      // login por senha já foi validado, mas o usuário precisa saber que pode
+      // tentar a ativação novamente ou entrar sem ela.
+      setErro(mensagemBiometria(err));
     } finally {
       setCarregando(false);
     }
   };
 
   /** Login rápido: leitura biométrica + sessão emitida sem digitar senha. */
-  const entrarComBiometria = async () => {
+  const entrarComBiometria = async (automatico = false) => {
     setErro("");
     setBiometriaCarregando(true);
     try {
       const lista = biometria.credenciaisSalvas();
       if (!lista.length)
         throw new Error("Nenhum dispositivo com biometria ativada neste navegador.");
-      const alvo = lista[0];
+
+      // O desafio do servidor pertence a uma credencial específica. Enviar
+      // todos os ids no allowCredentials permitia que o navegador escolhesse
+      // outro dispositivo e, então, o servidor recusava a prova por não achar
+      // o desafio correspondente. Tentamos cada credencial separadamente.
       const rpId = window.location.hostname;
-      const { desafio } = await api.biometriaDesafioLogin(alvo.credentialId);
-      const prova = await biometria.autenticar({
-        desafio,
-        rpId,
-        credencialIds: lista.map((c) => c.credentialId),
-      });
-      const escolhida = lista.find((c) => c.credentialId === prova.credentialId) ?? alvo;
-      const sessao = await api.biometriaEntrar({
-        credentialId: prova.credentialId,
-        refreshToken: escolhida.refreshToken,
-        clientDataJSON: prova.clientDataJSON,
-        authenticatorData: prova.authenticatorData,
-        signature: prova.signature,
-      });
-      aoEntrar(sessao);
+      let ultimoErro: unknown = null;
+      for (const credencial of lista) {
+        try {
+          const { desafio } = await api.biometriaDesafioLogin(credencial.credentialId);
+          const prova = await biometria.autenticar({
+            desafio,
+            rpId,
+            credencialIds: [credencial.credentialId],
+          });
+          const sessao = await api.biometriaEntrar({
+            credentialId: prova.credentialId,
+            refreshToken: credencial.refreshToken,
+            clientDataJSON: prova.clientDataJSON,
+            authenticatorData: prova.authenticatorData,
+            signature: prova.signature,
+          });
+          aoEntrar(sessao);
+          return;
+        } catch (err) {
+          ultimoErro = err;
+          // Cancelar a leitura é uma decisão do usuário: não abra outra
+          // solicitação logo em seguida. Para uma credencial inválida, porém,
+          // seguimos para o próximo dispositivo cadastrado.
+          if (err instanceof DOMException && err.name === "NotAllowedError") throw err;
+          // Só vale tentar outra credencial quando esta foi removida do
+          // servidor ou o usuário ficou inativo. Erros de rede/assinatura não
+          // devem disparar várias janelas biométricas em sequência.
+          if (!(err instanceof Error) || !/não reconhecid|inativ/i.test(err.message)) throw err;
+        }
+      }
+      throw ultimoErro ?? new Error("Não foi possível entrar com a biometria.");
     } catch (err) {
-      setErro(mensagemBiometria(err));
+      // Quando a tentativa automática não é permitida sem um clique (alguns
+      // navegadores fazem isso), deixamos o botão visível como fallback sem
+      // mostrar um erro vermelho para o usuário.
+      const cancelada = err instanceof DOMException && err.name === "NotAllowedError";
+      if (!automatico || !cancelada) setErro(mensagemBiometria(err));
     } finally {
       setBiometriaCarregando(false);
     }
   };
+
+  // Depois de sair, a sessão some do sessionStorage, mas a credencial continua
+  // no localStorage. Assim a tela de login já chama Face ID/Digital e conclui
+  // o preenchimento/entrada automaticamente, sem depender de o usuário notar
+  // um botão pequeno na tela. Se o navegador exigir gesto, o botão continua
+  // funcionando normalmente.
+  useEffect(() => {
+    if (
+      tentativaAutomaticaRef.current ||
+      !credenciais.length ||
+      !biometria.suportada() ||
+      criando ||
+      ativacaoPendente
+    )
+      return;
+
+    const timer = window.setTimeout(() => {
+      if (tentativaAutomaticaRef.current) return;
+      tentativaAutomaticaRef.current = true;
+      void entrarComBiometria(true);
+    }, 150);
+
+    return () => window.clearTimeout(timer);
+  }, [credenciais.length, criando, ativacaoPendente]);
 
   const removerDispositivo = async () => {
     const lista = biometria.credenciaisSalvas();
@@ -356,7 +409,7 @@ export default function Login({ aoEntrar }: { aoEntrar: (s: Sessao) => void }) {
                 <div className="space-y-2.5">
                   <button
                     type="button"
-                    onClick={entrarComBiometria}
+                    onClick={() => void entrarComBiometria()}
                     disabled={biometriaCarregando}
                     className="flex w-full items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-br from-[#FF6B00] to-[#FF8C33] px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-orange-600/25 transition-all hover:shadow-orange-600/40 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
                   >
@@ -397,7 +450,7 @@ export default function Login({ aoEntrar }: { aoEntrar: (s: Sessao) => void }) {
                     value={usuario}
                     onChange={(e) => setUsuario(e.target.value)}
                     placeholder="admin"
-                    autoComplete="username"
+                    autoComplete="username webauthn"
                     autoFocus
                   />
                 </Campo>

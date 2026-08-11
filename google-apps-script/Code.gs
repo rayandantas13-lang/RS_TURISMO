@@ -31,7 +31,8 @@ var SEGURANCA = {
   // v4: desconto (tipoDesconto/desconto) gravado na planilha + migração
   //     automática de abas criadas com layout antigo.
   // v6: biometria (WebAuthn) — Face ID / Touch ID / leitor de digital.
-  versao: '6',
+  // v7: normaliza bytes recebidos do navegador e aceita assinatura ES256 em DER.
+  versao: '7',
   tamanhoMaximoRequisicao: 300000,
   horasSessao: 8,
   maxTentativasLogin: 5,
@@ -1179,7 +1180,51 @@ function bytesParaBase64Url(bytes) {
 function base64UrlParaBytes(valor) {
   var s = String(valor).replace(/-/g, '+').replace(/_/g, '/');
   while (s.length % 4 !== 0) s += '=';
-  return Utilities.base64Decode(s);
+  return normalizarBytes(Utilities.base64Decode(s));
+}
+
+/**
+ * AuthenticatorAssertionResponse.signature chega em DER (ASN.1), mas o
+ * verificador ECDSA abaixo recebe os dois inteiros compactados r||s. Alguns
+ * navegadores já entregam os 64 bytes compactos; os dois formatos são aceitos.
+ */
+function assinaturaEcdsaParaRaw(assinatura) {
+  if (assinatura.length === 64) return assinatura;
+  if (assinatura.length < 8 || assinatura[0] !== 0x30) return null;
+
+  var pos = 1;
+  var tamanho = assinatura[pos++];
+  if (tamanho & 0x80) {
+    var bytesTamanho = tamanho & 0x7f;
+    if (!bytesTamanho || bytesTamanho > 2 || pos + bytesTamanho > assinatura.length) return null;
+    tamanho = 0;
+    for (var i = 0; i < bytesTamanho; i++) tamanho = tamanho * 256 + assinatura[pos++];
+  }
+  if (pos + tamanho !== assinatura.length) return null;
+
+  function inteiro() {
+    if (pos >= assinatura.length || assinatura[pos++] !== 0x02 || pos >= assinatura.length) return null;
+    var tamanhoInteiro = assinatura[pos++];
+    if (tamanhoInteiro & 0x80) {
+      var bytesInteiro = tamanhoInteiro & 0x7f;
+      if (!bytesInteiro || bytesInteiro > 2 || pos + bytesInteiro > assinatura.length) return null;
+      tamanhoInteiro = 0;
+      for (var j = 0; j < bytesInteiro; j++) tamanhoInteiro = tamanhoInteiro * 256 + assinatura[pos++];
+    }
+    if (!tamanhoInteiro || pos + tamanhoInteiro > assinatura.length) return null;
+    var valor = assinatura.slice(pos, pos + tamanhoInteiro);
+    pos += tamanhoInteiro;
+    while (valor.length > 32 && valor[0] === 0) valor = valor.slice(1);
+    if (valor.length > 32) return null;
+    var preenchido = [];
+    for (var k = 0; k < 32 - valor.length; k++) preenchido.push(0);
+    return preenchido.concat(valor);
+  }
+
+  var r = inteiro();
+  var s = inteiro();
+  if (!r || !s || pos !== assinatura.length) return null;
+  return r.concat(s);
 }
 
 function iguaisBytes(a, b) {
@@ -1389,7 +1434,13 @@ function biometriaEntrar(req) {
 
   var authData = base64UrlParaBytes(texto(req.authenticatorData, 16000, true, 'Autenticação'));
   var cdjBytes = base64UrlParaBytes(texto(req.clientDataJSON, 16000, true, 'Autenticação'));
-  var assinatura = base64UrlParaBytes(texto(req.signature, 1000, true, 'Assinatura'));
+  var assinatura = assinaturaEcdsaParaRaw(
+    base64UrlParaBytes(texto(req.signature, 1000, true, 'Assinatura'))
+  );
+  if (!assinatura) {
+    registrarFalhaLogin(chaveLimite);
+    throw new Error('Assinatura inválida.');
+  }
 
   var cliente = lerClienteDataJSON(cdjBytes);
   if (cliente.type !== 'webauthn.get') {
