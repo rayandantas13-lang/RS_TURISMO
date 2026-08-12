@@ -219,9 +219,9 @@ export default function Dashboard({ ir }: { ir: (r: string) => void }) {
         />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-3">
-        <Cartao className="xl:col-span-2">
-          <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-4">
+      <div className="grid min-w-0 gap-6 xl:grid-cols-3">
+        <Cartao className="min-w-0 overflow-hidden xl:col-span-2">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-4 py-4 sm:px-5">
             <div>
               <h2 className="font-bold text-zinc-900">Passeios de hoje</h2>
               <p className="text-xs text-zinc-500">{dataBR(h)}</p>
@@ -231,7 +231,7 @@ export default function Dashboard({ ir }: { ir: (r: string) => void }) {
             </Botao>
           </div>
           {d.doDia.length ? (
-            <ul className="space-y-0.5 p-3">
+            <ul className="space-y-0.5 p-2 sm:p-3">
               {d.doDia.map((e) => (
                 <LinhaEvento
                   key={e.p.id}
@@ -252,13 +252,13 @@ export default function Dashboard({ ir }: { ir: (r: string) => void }) {
           )}
         </Cartao>
 
-        <Cartao className="p-5">
+        <Cartao className="min-w-0 overflow-hidden p-4 sm:p-5">
           <h2 className="font-bold text-zinc-900">Pessoas por dia</h2>
           <p className="text-xs text-zinc-500">Próximos dias</p>
-          <div className="mt-6 flex h-44 items-end justify-between gap-2">
+          <div className="mt-6 flex h-44 min-w-0 items-end justify-between gap-1 sm:gap-2">
             {d.serie.map((s) => (
-              <div key={s.dia} className="flex flex-1 flex-col items-center gap-2">
-                <span className="text-[10px] font-bold text-zinc-400">{s.pessoas || ""}</span>
+              <div key={s.dia} className="flex min-w-0 flex-1 flex-col items-center gap-2">
+                <span className="max-w-full truncate text-[10px] font-bold text-slate-400">{s.pessoas || ""}</span>
                 <div className="flex h-32 w-full items-end">
                   <div
                     className={cn(
