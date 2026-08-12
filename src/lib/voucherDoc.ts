@@ -22,7 +22,7 @@ import {
    CORES - RS TURISMO - Preto, Laranja e Branco
    ============================================================ */
 const CORES = {
-  primaria: [10, 10, 10] as [number, number, number],      // preto RS #0A0A0A
+  primaria: [0, 0, 0] as [number, number, number],         // preto RS #000000
   secundaria: [255, 107, 0] as [number, number, number],   // laranja RS #FF6B00
   escuro: [10, 10, 10] as [number, number, number],        // preto
   cinza: [100, 100, 100] as [number, number, number],
@@ -136,17 +136,13 @@ class PDFVoucherBuilder {
      MÉTODOS DE CONSTRUÇÃO
      ============================================================ */
 
-  // 1. CABEÇALHO - RS TURISMO Preto + Laranja
+  // 1. CABEÇALHO - RS TURISMO Tudo Preto
   private construirCabecalho(config: Config, voucher: Voucher) {
     const ALT_BANNER = 40;
 
-    // Fundo preto RS TURISMO
+    // Fundo preto RS TURISMO (tudo preto para disfarçar o fundo da logo)
     this.doc.setFillColor(...CORES.primaria);
     this.doc.rect(0, 0, this.L, ALT_BANNER, "F");
-
-    // Detalhe triangular laranja
-    this.doc.setFillColor(...CORES.secundaria);
-    this.doc.triangle(this.L - 55, 0, this.L, 0, this.L, ALT_BANNER, "F");
 
     // Marca oficial vetorizada (PNG com o conteúdo recentralizado no
     // canvas — proporção 810:522, 1.55:1). Centralizada verticalmente
@@ -188,7 +184,7 @@ class PDFVoucherBuilder {
     });
 
     // Voucher à direita
-    this.texto("VOUCHER", this.L - this.M, 9.5, 8, "bold", [253, 230, 138], "right");
+    this.texto("VOUCHER", this.L - this.M, 9.5, 8, "bold", CORES.destaque, "right");
     this.texto(voucher.codigo, this.L - this.M, 17.5, 16, "bold", CORES.branco, "right");
     this.texto(
       `Emitido em ${dataBR(voucher.criadoEm.slice(0, 10))}`,
@@ -196,7 +192,7 @@ class PDFVoucherBuilder {
       23.5,
       7.5,
       "normal",
-      [253, 230, 138],
+      [200, 200, 200],
       "right"
     );
 
