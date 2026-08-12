@@ -148,9 +148,13 @@ class PDFVoucherBuilder {
     this.doc.setFillColor(...CORES.secundaria);
     this.doc.triangle(this.L - 55, 0, this.L, 0, this.L, ALT_BANNER, "F");
 
-    // Marca oficial vetorizada (PNG gerada a partir do SVG original)
-    // Proporção 768:515 (1.49:1) mantida perfeitamente.
-    this.doc.addImage(logoDataUrl, "PNG", this.M - 1, 5, 34, 22.8, undefined, "FAST");
+    // Marca oficial vetorizada (PNG com o conteúdo recentralizado no
+    // canvas — proporção 810:522, 1.55:1). Centralizada verticalmente
+    // dentro do banner (altura 40mm) para não ficar deslocada para cima.
+    const LOGO_LARGURA = 34;
+    const LOGO_ALTURA = 21.9;
+    const LOGO_Y = (ALT_BANNER - LOGO_ALTURA) / 2;
+    this.doc.addImage(logoDataUrl, "PNG", this.M - 1, LOGO_Y, LOGO_LARGURA, LOGO_ALTURA, undefined, "FAST");
 
 
     // Nome da empresa
