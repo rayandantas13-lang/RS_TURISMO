@@ -94,9 +94,6 @@ export default function Login({ aoEntrar }: { aoEntrar: (s: Sessao) => void }) {
             Painel administrativo
             <span className="size-1.5 rounded-full bg-orange-500" />
           </p>
-          <p className="mt-1 text-[11px] font-semibold tracking-widest text-orange-400 uppercase">
-            Preto • Laranja • Branco
-          </p>
         </div>
 
         <div className="rounded-3xl bg-white p-6 shadow-2xl shadow-black/50 ring-1 ring-zinc-200">
@@ -261,13 +258,8 @@ export default function Login({ aoEntrar }: { aoEntrar: (s: Sessao) => void }) {
             </p>
           )}
 
-          <div className="mt-6 flex items-center justify-center gap-2 border-t border-zinc-100 pt-4 text-[11px] text-zinc-400">
-            <span className="size-1.5 rounded-full bg-black" />
-            <span className="size-1.5 rounded-full bg-orange-500" />
-            <span className="size-1.5 rounded-full bg-white ring-1 ring-zinc-200" />
-            <span className="ml-1 font-semibold tracking-wide text-zinc-500">
-              RS TURISMO • Preto Laranja Branco
-            </span>
+          <div className="mt-6 border-t border-zinc-100 pt-4 text-center text-[11px] font-semibold tracking-wide text-zinc-500">
+            RS TURISMO
           </div>
         </div>
       </div>
