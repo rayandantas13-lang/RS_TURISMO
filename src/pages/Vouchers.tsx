@@ -476,24 +476,24 @@ export default function Vouchers() {
                         <Icon name="send" className="size-4" />
                         {enviando === v.id ? "Abrindo..." : "Enviar WhatsApp"}
                       </button>
-                      <button
-                        onClick={() => baixar(v)}
-                        className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-slate-900 px-3 py-2.5 text-xs font-bold text-white transition hover:bg-slate-800"
-                      >
-                        <Icon name="download" className="size-4" /> Baixar PDF
-                      </button>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-1">
                       <a
                         href={linkGoogleAgenda(v, config)}
                         target="_blank"
                         rel="noreferrer"
-                        title="Abrir no Google Agenda"
-                        className="inline-grid size-9 place-items-center rounded-lg text-slate-500 transition hover:bg-orange-50 hover:text-orange-600"
+                        title="Abre um novo evento no Google Agenda com os dados deste voucher"
+                        className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#4285F4] px-3 py-2.5 text-xs font-bold text-white transition hover:bg-[#3367D6]"
                       >
-                        <Icon name="calendar" className="size-4" />
+                        <Icon name="calendar" className="size-4" /> Google Agenda
                       </a>
+                    </div>
+                    <button
+                      onClick={() => baixar(v)}
+                      className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-slate-900 px-3 py-2.5 text-xs font-bold text-white transition hover:bg-slate-800"
+                    >
+                      <Icon name="download" className="size-4" /> Baixar PDF
+                    </button>
+
+                    <div className="flex flex-wrap items-center gap-1">
                       <BotaoIcone
                         icone="eye"
                         titulo="Pré-visualizar envio"
