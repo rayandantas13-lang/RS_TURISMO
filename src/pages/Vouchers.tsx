@@ -86,6 +86,9 @@ export default function Vouchers() {
   const { vouchers, config, salvarVoucher, removerVoucher, mudarStatus, notificar } = useStore();
   const [busca, setBusca] = useState("");
   const [filtro, setFiltro] = useState<"todos" | StatusVoucher>("todos");
+  const [fPasseio, setFPasseio] = useState("");
+  const [fDe, setFDe] = useState("");
+  const [fAte, setFAte] = useState("");
   const [form, setForm] = useState<Voucher | null>(null);
   const [erro, setErro] = useState("");
   const [excluir, setExcluir] = useState<Voucher | null>(null);
@@ -94,16 +97,42 @@ export default function Vouchers() {
 
   const lista = useMemo(() => {
     const q = normalizar(busca.trim());
+    const nomePasseio = normalizar(fPasseio.trim());
     return vouchers
       .filter((v) => {
         if (filtro !== "todos" && v.status !== filtro) return false;
+        const passeios = (v.passeios || []).filter((p) => {
+          if (nomePasseio && normalizar(p.nome) !== nomePasseio) return false;
+          if (fDe || fAte) {
+            if (!p.data) return false;
+            if (fDe && p.data < fDe) return false;
+            if (fAte && p.data > fAte) return false;
+          }
+          return true;
+        });
+        if ((nomePasseio || fDe || fAte) && passeios.length === 0) return false;
         if (!q) return true;
         return normalizar(
           `${v.codigo} ${nomesClientes(v)} ${nomesPasseios(v)} ${v.hotel} ${v.telefone}`,
         ).includes(q);
       })
       .sort((a, b) => (primeiraData(b) || b.criadoEm).localeCompare(primeiraData(a) || a.criadoEm));
-  }, [vouchers, busca, filtro]);
+  }, [vouchers, busca, filtro, fPasseio, fDe, fAte]);
+
+  const opcoesPasseios = useMemo(() => {
+    const nomes = new Map<string, string>();
+    (config.servicos || []).forEach((s) => {
+      const n = s.nome.trim();
+      if (n) nomes.set(normalizar(n), n);
+    });
+    vouchers.forEach((v) =>
+      (v.passeios || []).forEach((p) => {
+        const n = p.nome.trim();
+        if (n && !nomes.has(normalizar(n))) nomes.set(normalizar(n), n);
+      }),
+    );
+    return [...nomes.values()].sort((a, b) => a.localeCompare(b, "pt-BR"));
+  }, [config.servicos, vouchers]);
 
   const stats = useMemo(() => {
     const ativos = vouchers.filter((v) => v.status !== "cancelado");
@@ -277,6 +306,54 @@ export default function Vouchers() {
               </button>
             ))}
           </div>
+        </div>
+
+        <div className="mt-3 flex flex-col gap-3 border-t border-slate-100 pt-3 sm:flex-row sm:flex-wrap sm:items-end">
+          <div className="w-full sm:w-64">
+            <p className="mb-1.5 text-xs font-semibold text-slate-600">Filtrar por passeio</p>
+            <Selecao value={fPasseio} onChange={(e) => setFPasseio(e.target.value)}>
+              <option value="">Todos os passeios</option>
+              {opcoesPasseios.map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </Selecao>
+          </div>
+
+          <div className="w-full sm:w-auto">
+            <p className="mb-1.5 text-xs font-semibold text-slate-600">Período personalizado</p>
+            <div className="flex items-center gap-2">
+              <Entrada
+                type="date"
+                value={fDe}
+                max={fAte || undefined}
+                onChange={(e) => setFDe(e.target.value)}
+                className="min-w-0 flex-1 sm:w-40 sm:flex-none"
+              />
+              <span className="shrink-0 text-xs font-semibold text-slate-400">até</span>
+              <Entrada
+                type="date"
+                value={fAte}
+                min={fDe || undefined}
+                onChange={(e) => setFAte(e.target.value)}
+                className="min-w-0 flex-1 sm:w-40 sm:flex-none"
+              />
+            </div>
+          </div>
+
+          {(fPasseio || fDe || fAte) && (
+            <button
+              onClick={() => {
+                setFPasseio("");
+                setFDe("");
+                setFAte("");
+              }}
+              className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-xl px-3 text-xs font-bold text-slate-500 ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-800 sm:w-auto"
+            >
+              <Icon name="close" className="size-3.5" /> Limpar filtros
+            </button>
+          )}
         </div>
       </Cartao>
 
