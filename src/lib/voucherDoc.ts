@@ -719,26 +719,31 @@ export function linkGoogleAgenda(v: Voucher, config: Config) {
     datas = `${inicio.data.replace(/-/g, "")}/${seguinte.getFullYear()}${zzz(seguinte.getMonth() + 1)}${zzz(seguinte.getDate())}`;
   }
 
+  // O evento precisa ser útil para a operação, sem expor valores do voucher.
+  // Quando há mais de um passeio, todos ficam discriminados na descrição,
+  // inclusive as respectivas datas, horários e instruções.
   const detalhes = [
-    `Voucher: ${v.codigo}`,
-    `Cliente: ${nomesClientes(v)} (${totalPessoas(v)} pessoa${totalPessoas(v) > 1 ? "s" : ""})`,
-    v.hotel ? `Hotel: ${v.hotel}` : "",
-    ordenados
-      .map((p) => {
-        let line = `• ${p.nome} — ${dataBR(p.data)}`;
-        if (p.hora) line += ` às ${p.hora} (ida)`;
-        if (p.dataVolta && p.dataVolta !== p.data) {
-          line += ` | Volta ${dataBR(p.dataVolta)}`;
-          if (p.horaVolta) line += ` às ${p.horaVolta}`;
-        } else if (p.horaVolta) {
-          line += ` | Volta às ${p.horaVolta}`;
-        }
-        return line;
-      })
-      .join("\n"),
+    `VOUCHER: ${v.codigo}`,
+    `PESSOAS: ${nomesClientes(v)} (${totalPessoas(v)} pessoa${totalPessoas(v) > 1 ? "s" : ""})`,
+    v.hotel ? `HOTEL/HOSPEDAGEM: ${v.hotel}` : "",
+    v.telefone ? `TELEFONE: ${v.telefone}` : "",
+    v.contatoExtra ? `CONTATO ADICIONAL: ${v.contatoExtra}` : "",
     "",
-    `Total: ${brl(v.total)} | Entrada: ${brl(v.entrada)} | A receber: ${brl(aReceber(v))}`,
-    config.telefone ? `Contato: ${config.telefone}` : "",
+    "PASSEIOS:",
+    ...ordenados.map((p) => {
+      const linhas = [`• ${p.nome} — ${dataBR(p.data)}${p.hora ? ` às ${p.hora} (ida)` : ""}`];
+      if (p.dataVolta && p.dataVolta !== p.data) {
+        linhas.push(`  Volta: ${dataBR(p.dataVolta)}${p.horaVolta ? ` às ${p.horaVolta}` : ""}`);
+      } else if (p.horaVolta) {
+        linhas.push(`  Volta: ${p.horaVolta}`);
+      }
+      if (p.local) linhas.push(`  Ponto de encontro: ${p.local}`);
+      if (p.oQueLevar) linhas.push(`  O que levar: ${p.oQueLevar}`);
+      if (p.informacoesAdicionais) linhas.push(`  Informações: ${p.informacoesAdicionais}`);
+      return linhas.join("\n");
+    }),
+    v.observacoes ? `\nOBSERVAÇÕES: ${v.observacoes}` : "",
+    config.telefone ? `\nContato ${config.empresa}: ${config.telefone}` : "",
   ]
     .filter(Boolean)
     .join("\n");
