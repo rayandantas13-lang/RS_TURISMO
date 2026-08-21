@@ -145,6 +145,36 @@ export function mensagemVoucher(v: Voucher, config: Config) {
 export const linkAbrirWhatsApp = (texto = "") =>
   `https://wa.me/${texto ? `?text=${encodeURIComponent(texto)}` : ""}`;
 
+/**
+ * Link do WhatsApp para um número específico (abre a conversa com aquele contato).
+ * Aceita telefone mascarado ou só dígitos. Números BR com 10/11 dígitos
+ * recebem o DDI 55 automaticamente.
+ */
+export const linkWhatsAppNumero = (telefone: string, texto = "") => {
+  const digitos = (telefone || "").replace(/\D/g, "");
+  if (!digitos) return "";
+  // Já tem DDI (12+ dígitos, ex.: 55 + DDD + número) ou é só BR local (10/11)
+  const comPais =
+    digitos.length >= 10 && digitos.length <= 11 ? `55${digitos}` : digitos;
+  const base = `https://wa.me/${comPais}`;
+  return texto ? `${base}?text=${encodeURIComponent(texto)}` : base;
+};
+
+/**
+ * Abre um link do WhatsApp de forma amigável ao dispositivo:
+ * - no celular, navega na própria aba (evita bloqueio de pop-up / target=_blank);
+ * - no computador, abre em nova aba.
+ */
+export const abrirLinkWhatsApp = (url: string) => {
+  if (!url || typeof window === "undefined") return;
+  const mobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || "");
+  if (mobile) {
+    window.location.href = url;
+  } else {
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+};
+
 export const iniciais = (nome: string) =>
   (nome || "?")
     .trim()

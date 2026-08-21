@@ -7,6 +7,7 @@ import {
   dataBR,
   datasPasseios,
   linkAbrirWhatsApp,
+  linkWhatsAppNumero,
   mascaraCnpj,
   mascaraTelefone,
   mensagemVoucher,
@@ -252,9 +253,45 @@ class PDFVoucherBuilder {
     this.y += 3;
 
     // Linha 2: Hotel + Telefone lado a lado
+    // O telefone do cliente vira link azul clicável para o WhatsApp dele
+    // (área de toque cobre o campo inteiro — rótulo + número — para o dedo
+    // no celular não errar uma faixa minúscula).
     this.checkPageBreak(15);
     const altH = desenhaCampo("Hotel", voucher.hotel || "—", this.M, this.y, colWidth);
-    const altT = desenhaCampo("Telefone", [voucher.telefone, voucher.contatoExtra].filter(Boolean).join(" · ") || "—", this.M + colWidth + 6, this.y, colWidth);
+
+    const telX = this.M + colWidth + 6;
+    const telY = this.y;
+    const telValor =
+      [voucher.telefone, voucher.contatoExtra].filter(Boolean).join(" · ") || "—";
+    const urlWa = linkWhatsAppNumero(voucher.telefone || "");
+    const corTel: [number, number, number] = urlWa ? [37, 99, 235] : CORES.escuro;
+
+    this.texto("TELEFONE", telX, telY, 7, "bold", CORES.cinza);
+    this.doc.setFont("helvetica", "bold");
+    this.doc.setFontSize(10.5);
+    const telLines = (this.doc.splitTextToSize(telValor, colWidth - 2) as string[]).slice(0, 3);
+
+    telLines.forEach((t, i) => {
+      const yy = telY + 6 + i * 5;
+      this.texto(t || (i === 0 ? "—" : ""), telX, yy, 10.5, "bold", corTel);
+      // Sublinhado só na 1ª linha do número (sinal visual de link)
+      if (urlWa && i === 0 && t) {
+        const tw = this.doc.getTextWidth(t);
+        this.doc.setDrawColor(37, 99, 235);
+        this.doc.setLineWidth(0.3);
+        this.doc.line(telX, yy + 1.2, telX + tw, yy + 1.2);
+        this.doc.setLineWidth(0.2);
+      }
+    });
+
+    const altT = 9.5 + Math.max(0, telLines.length - 1) * 5;
+
+    // Área clicável generosa: cobre rótulo + valor + folga lateral/vertical
+    // (~campo inteiro), para o toque no celular acertar o link com facilidade.
+    if (urlWa) {
+      this.doc.link(telX - 2, telY - 4, colWidth + 4, altT + 6, { url: urlWa });
+    }
+
     this.y += Math.max(altH, altT) + 1;
     this.linha(this.M, this.y - 1, this.W, [226, 232, 240]);
     this.y += 3;
