@@ -18,12 +18,14 @@ import {
 } from "@/components/ui";
 import {
   aReceber,
+  abrirLinkWhatsApp,
   brl,
   dataBR,
   datasPasseios,
   gerarCodigo,
   gerarHorarios,
   hoje,
+  linkWhatsAppNumero,
   mascaraTelefone,
   mensagemVoucher,
   nomesClientes,
@@ -371,7 +373,17 @@ export default function Vouchers() {
                     {v.telefone && (
                       <p className="flex items-center gap-2 text-xs text-slate-500">
                         <Icon name="phone" className="size-3.5 shrink-0" />
-                        {v.telefone}
+                        <a
+                          href={linkWhatsAppNumero(v.telefone)}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            abrirLinkWhatsApp(linkWhatsAppNumero(v.telefone));
+                          }}
+                          title="Abrir WhatsApp do cliente"
+                          className="font-semibold text-emerald-700 underline-offset-2 hover:underline"
+                        >
+                          {v.telefone}
+                        </a>
                       </p>
                     )}
                   </div>
