@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type FocusEvent } from "react";
 import { useStore } from "@/store";
 import type { StatusVoucher, Voucher } from "@/types";
 import { Icon } from "@/components/Icon";
@@ -50,6 +50,16 @@ import {
 import { cn } from "@/utils/cn";
 
 const HORARIOS = gerarHorarios("04:00", "23:00");
+
+/**
+ * Campos numéricos (R$ e nº de pessoas) ficam vazios quando o valor é 0,
+ * em vez de exibirem "0". Assim, no celular, ao digitar "150" o campo não
+ * vira "0150" — o "0" inicial não fica "grudado" no número digitado.
+ */
+const valorOuVazio = (n: number | undefined) => (Number.isFinite(n) && n !== 0 ? n : "");
+
+/** Seleciona todo o conteúdo do campo ao focar, para digitar por cima. */
+const selecionar = (e: FocusEvent<HTMLInputElement>) => e.target.select();
 
 const novoVoucher = (): Voucher => ({
   id: uid(),
@@ -504,6 +514,7 @@ export default function Vouchers() {
                   type="number"
                   min={1}
                   value={form.pessoas}
+                  onFocus={selecionar}
                   onChange={(e) => set({ pessoas: Number(e.target.value) })}
                 />
               </Campo>
@@ -670,8 +681,10 @@ export default function Vouchers() {
                   type="number"
                   min={0}
                   step="0.01"
-                  value={form.total}
+                  value={valorOuVazio(form.total)}
+                  onFocus={selecionar}
                   onChange={(e) => set({ total: Number(e.target.value) })}
+                  placeholder="0"
                 />
               </Campo>
               <Campo
@@ -696,7 +709,8 @@ export default function Vouchers() {
                     type="number"
                     min={0}
                     step="0.01"
-                    value={form.desconto}
+                    value={valorOuVazio(form.desconto)}
+                    onFocus={selecionar}
                     onChange={(e) => set({ desconto: Number(e.target.value) })}
                     placeholder="0"
                   />
@@ -707,8 +721,10 @@ export default function Vouchers() {
                   type="number"
                   min={0}
                   step="0.01"
-                  value={form.entrada}
+                  value={valorOuVazio(form.entrada)}
+                  onFocus={selecionar}
                   onChange={(e) => set({ entrada: Number(e.target.value) })}
+                  placeholder="0"
                 />
               </Campo>
               <Campo rotulo="A receber">
